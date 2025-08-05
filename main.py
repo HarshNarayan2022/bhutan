@@ -53,8 +53,8 @@ app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 app.config["SESSION_PERMANENT"] = False
 app.config["PERMANENT_SESSION_LIFETIME"] = 3600  # 1 hour
 
-# FastAPI backend URL
-BACKEND_URL = "http://localhost:8000"
+# FastAPI backend URL - configurable for different deployment environments
+BACKEND_URL = os.getenv('BACKEND_URL', 'http://localhost:8000')
 
 
 # Helper function to extract topics
@@ -434,6 +434,31 @@ def initialize_session():
 @app.route("/")
 def home():
     return render_template("home.html")
+
+# Health check endpoint for Render deployment
+@app.route("/health")
+def health():
+    """Health check endpoint for monitoring and load balancers"""
+    try:
+        # Basic health check - ensure app is responsive
+        db_session = DBSession()
+        # Simple database connectivity test
+        db_session.execute("SELECT 1")
+        db_session.close()
+        
+        return jsonify({
+            "status": "healthy",
+            "service": "Mental Health Chatbot Flask App",
+            "timestamp": datetime.utcnow().isoformat(),
+            "version": "1.0.0"
+        }), 200
+    except Exception as e:
+        return jsonify({
+            "status": "unhealthy",
+            "service": "Mental Health Chatbot Flask App",
+            "error": str(e),
+            "timestamp": datetime.utcnow().isoformat()
+        }), 503
 
 # Update the login route 
 # Update the login route to load user history

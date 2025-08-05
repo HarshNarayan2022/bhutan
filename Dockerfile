@@ -1,50 +1,43 @@
-# Use Python 3.11 slim image for better performance
 FROM python:3.11-slim
 
-# Set environment variables
+# Set environment variables for Render deployment
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PYTHONPATH="/app" \
-    PORT=5000 \
-    FASTAPI_PORT=8000
+    PORT=10000 \
+    DEBIAN_FRONTEND=noninteractive
 
-# Install system dependencies
+# Install system dependencies required for the app
 RUN apt-get update && apt-get install -y \
-    build-essential \
+    gcc \
+    g++ \
     curl \
-    software-properties-common \
-    git \
     ffmpeg \
-    && rm -rf /var/lib/apt/lists/*
+    build-essential \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
 
 # Set work directory
 WORKDIR /app
 
 # Copy requirements first to leverage Docker cache
-COPY requirements.txt pyproject.toml ./
+COPY requirements.txt .
 
 # Install Python dependencies
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt && \
-    pip install --no-cache-dir gunicorn uvicorn[standard]
+    pip install --no-cache-dir -r requirements.txt
 
-# Copy project files
+# Copy application code
 COPY . .
 
-# Create necessary directories
-RUN mkdir -p /app/logs /app/processed_docs /app/chat_sessions /app/survey_data
+# Create necessary directories with proper permissions
+RUN mkdir -p /app/data /app/logs /app/uploads /app/chat_sessions /app/survey_data
 
-# Create non-root user for security
-RUN adduser --disabled-password --gecos '' --shell /bin/bash user && \
-    chown -R user:user /app
-USER user
+# Expose the port that Render expects
+EXPOSE $PORT
 
-# Expose ports
-EXPOSE $PORT $FASTAPI_PORT
+# Health check for monitoring
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+    CMD curl -f http://localhost:$PORT/health || exit 1
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:$PORT/ || exit 1
-
-# Default command
-CMD ["sh", "-c", "python start_services.py"]
+# Start command optimized for Render
+CMD ["python", "render_start.py"]

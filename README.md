@@ -62,288 +62,124 @@ A comprehensive multi-agent mental health support application that combines AI-p
 - **Vector Store**: Knowledge base for RAG system
 - **Session Storage**: Temporary chat data and user context
 
-## 🚀 Quick Start
+## 🚀 Docker Deployment for Render.com
+
+This application is optimized for single-container Docker deployment on Render.com.
 
 ### Prerequisites
-- Python 3.11+
-- Docker and Docker Compose
+- Docker
 - Git
-
-### Development Setup
-```bash
-# Clone the repository
-git clone <repository-url>
-cd bhutan
-
-# Quick setup with Make
-make setup
-
-# Or manual setup
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install -r requirements.txt
-
-# Configure environment
-cp .env.production .env
-# Edit .env with your configuration
-
-# Run the application
-make run
-# Or manually
-python start_services.py
-```
-
-### Docker Deployment
-```bash
-# Development
-make deploy
-
-# Production
-make deploy-prod
-
-# Using deployment script
-./deploy.sh deploy production
-```
-
-### Kubernetes Deployment
-```bash
-# Deploy to Kubernetes
-make deploy-k8s
-
-# Check status
-kubectl get pods
-kubectl logs -f deployment/mental-health-app
-```
-
-## 🚀 Setup and Installation
-
-### Prerequisites
-- Python 3.11 or higher
-- pip or uv package manager
-- Docker and Docker Compose (for containerized deployment)
-- Node.js (for any frontend dependencies, if needed)
-
-### Quick Start (Docker - Recommended)
-
-1. **Clone and Setup**
-   ```bash
-   git clone <repository-url>
-   cd bhutan
-   cp .env.production .env
-   # Edit .env with your API keys and configuration
-   ```
-
-2. **Deploy with Docker Compose**
-   ```bash
-   # Development
-   docker-compose -f docker-compose.dev.yml up -d
-   
-   # Production
-   docker-compose up -d
-   ```
-
-3. **Access the Application**
-   - Main Application: http://localhost:5000
-   - API Documentation: http://localhost:8000/docs
-
-### Manual Installation (Development)
-
-1. **Clone the Repository**
-   ```bash
-   git clone <repository-url>
-   cd bhutan
-   ```
-
-2. **Create Virtual Environment**
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
-
-3. **Install Dependencies**
-   ```bash
-   # Development
-   pip install -r requirements.txt
-   
-   # Production
-   pip install -r requirements.prod.txt
-   ```
-
-4. **Environment Configuration**
-   ```bash
-   cp .env.production .env
-   # Edit .env with your actual values
-   ```
-
-5. **Initialize Database**
-   ```bash
-   python -c "from main import init_db; init_db()"
-   ```
-
-6. **Run the Application**
-   ```bash
-   # Using the service manager
-   python start_services.py
-   
-   # Or separately
-   # Terminal 1: FastAPI
-   uvicorn fastapi_app:app --host 0.0.0.0 --port 8000
-   
-   # Terminal 2: Flask
-   python main.py
-   ```
-
-## 🐳 Production Deployment
-
-### Docker Deployment
-
-The application is fully containerized and production-ready with Docker.
-
-#### Using Make Commands
-```bash
-# Build and deploy
-make docker-build
-make deploy-prod
-
-# Monitor
-make logs
-make health
-make status
-
-# Backup
-make backup
-
-# Update
-make prod-update
-```
-
-#### Using Deployment Script
-```bash
-# Make executable
-chmod +x deploy.sh
-
-# Full deployment
-./deploy.sh deploy production
-
-# Monitor and manage
-./deploy.sh status
-./deploy.sh logs
-./deploy.sh backup
-./deploy.sh health
-```
-
-### Kubernetes Deployment
-
-For cloud deployment, use the provided Kubernetes manifests:
-
-```bash
-# Apply configurations
-kubectl apply -f k8s/pvc.yaml
-kubectl apply -f k8s/configmap.yaml
-kubectl apply -f k8s/deployment.yaml
-kubectl apply -f k8s/ingress.yaml
-
-# Monitor deployment
-kubectl get pods
-kubectl logs -f deployment/mental-health-app
-
-# Scale application
-kubectl scale deployment mental-health-app --replicas=3
-```
+- Render.com account
 
 ### Environment Variables
 
-Essential environment variables for production:
+Create the following environment variables in your Render deployment:
 
+#### Required API Keys
 ```env
-# Required API Keys
 GOOGLE_API_KEY=your_google_api_key
 GROQ_API_KEY=your_groq_api_key
 OPENAI_API_KEY=your_openai_api_key
+```
 
-# Security
+#### Security
+```env
 SECRET_KEY=your_super_secure_secret_key
+FLASK_SECRET_KEY=your_flask_secret_key
 SESSION_COOKIE_SECURE=true
+```
 
-# Database (PostgreSQL recommended for production)
-DATABASE_URL=postgresql://user:password@host:5432/mental_health_app
-
-# Server
+#### Optional Configuration
+```env
 FLASK_ENV=production
 DEBUG=false
-WORKERS=4
-
-# Optional
-REDIS_URL=redis://redis:6379/0
-SENTRY_DSN=your_sentry_dsn
+ALLOWED_ORIGINS=https://yourdomain.onrender.com
 ```
 
-### Load Balancing and Scaling
+### Deployment Steps
 
-The application supports horizontal scaling:
+1. **Fork or Clone Repository**
+   ```bash
+   git clone <repository-url>
+   cd bhutan
+   ```
 
-1. **Docker Compose**: Adjust replica count in `docker-compose.yml`
-2. **Kubernetes**: Use `kubectl scale` command
-3. **Load Balancer**: Configure Nginx or cloud load balancer
+2. **Connect to Render**
+   - Create a new **Web Service** on Render.com
+   - Connect your GitHub repository
+   - Choose **Docker** as the runtime
 
-### Monitoring and Logging
+3. **Configure Render Settings**
+   - **Name**: `mental-health-chatbot`
+   - **Region**: Choose your preferred region
+   - **Branch**: `main` (or your deployment branch)
+   - **Root Directory**: Leave empty (uses repository root)
+   - **Dockerfile Path**: `./Dockerfile`
 
-#### Health Checks
-- Flask: `http://localhost:5000/`
-- FastAPI: `http://localhost:8000/health`
+4. **Set Environment Variables**
+   Add all required environment variables in the Render dashboard under "Environment"
 
-#### Log Files
-- Application: `/app/logs/app.log`
-- Gunicorn: `/app/logs/gunicorn_*.log`
-- Error: `/app/logs/error.log`
+5. **Deploy**
+   - Click "Create Web Service"
+   - Render will automatically build and deploy using the Dockerfile
+   - Monitor the deployment logs for any issues
 
-#### Monitoring Commands
-```bash
-# Docker logs
-docker-compose logs -f
+### Dockerfile Configuration
 
-# System health
-./deploy.sh health
+The included `Dockerfile` is optimized for Render deployment:
 
-# Resource usage
-docker stats
-```
+- Uses Python 3.11 slim base image
+- Installs all system dependencies (gcc, ffmpeg, etc.)
+- Sets up proper port handling with `$PORT` environment variable
+- Includes health checks for monitoring
+- Uses `render_start.py` for optimized startup
 
-### Backup and Disaster Recovery
+### Startup Process
 
-#### Automated Backup
-```bash
-# Create backup
-./deploy.sh backup
+The application uses `render_start.py` which:
 
-# Restore from backup
-./deploy.sh restore /path/to/backup
-```
+1. **Starts FastAPI Backend**: Launches on an internal port as a background service
+2. **Starts Flask Frontend**: Runs on the main Render port (`$PORT`)
+3. **Health Monitoring**: Both services include health check endpoints
+4. **Graceful Shutdown**: Handles termination signals properly
 
-#### Manual Backup
-```bash
-# Database
-docker exec container_name pg_dump -U user dbname > backup.sql
+### Health Checks
 
-# User files
-tar -czf backup.tar.gz data/ uploads/ chat_sessions/
-```
+- **Flask Health**: `https://yourdomain.onrender.com/health`
+- **FastAPI Health**: Internal health checks for service communication
 
-### Security Considerations
+### Monitoring and Logs
 
-1. **HTTPS**: Configure SSL certificates in production
-2. **Firewall**: Restrict access to necessary ports only
-3. **Secrets**: Use environment variables, never commit secrets
-4. **Updates**: Regularly update dependencies and base images
-5. **Monitoring**: Set up intrusion detection and log monitoring
+Access logs through the Render dashboard:
+- **Deploy Logs**: Build and deployment information
+- **Service Logs**: Application runtime logs
+- **Metrics**: CPU, memory, and request metrics
 
-### Performance Optimization
+### Troubleshooting
 
-1. **Caching**: Enable Redis for session and response caching
-2. **Database**: Use PostgreSQL with connection pooling
-3. **Workers**: Adjust Gunicorn workers based on CPU cores
-4. **CDN**: Use CDN for static assets in production
-5. **Monitoring**: Set up APM tools like Sentry or New Relic
+#### Common Issues
+
+1. **Build Failures**
+   - Check that all required environment variables are set
+   - Verify API keys are valid
+   - Review build logs for missing dependencies
+
+2. **Service Timeouts**
+   - Increase health check timeout in Render settings
+   - Monitor startup logs for initialization issues
+   - Ensure sufficient memory allocation
+
+3. **Database Issues**
+   - The application uses SQLite by default (file-based)
+   - Data persists between deployments in `/app/data/`
+   - For production, consider upgrading to PostgreSQL via Render add-ons
+
+#### Performance Optimization
+
+- **Memory**: Recommended minimum 1GB RAM
+- **CPU**: Single CPU core sufficient for moderate traffic
+- **Scaling**: Render auto-scales based on traffic
+- **Response Time**: Typical response time under 2 seconds
 
 ## 📱 Usage Guide
 
@@ -370,204 +206,124 @@ tar -czf backup.tar.gz data/ uploads/ chat_sessions/
 
 ### For Developers
 
-#### Adding New Assessments
-1. Create questionnaire JSON in `crew_ai/questionnaires/`
-2. Update `crew_ai/questionnaire.py` to include new assessment
-3. Add classification logic in the condition classifier agent
+#### Local Development
 
-#### Customizing Agents
-1. Modify agent configurations in `config/agents.yaml`
-2. Update agent implementations in `crew_ai/chatbot.py`
-3. Adjust tools and capabilities as needed
+For local development and testing:
 
-#### Extending the Knowledge Base
-1. Add PDF documents to `knowledge/` directory
-2. Run document ingestion scripts in `scripts/ingest/`
-3. Update vector store configuration if needed
+```bash
+# Clone the repository
+git clone <repository-url>
+cd bhutan
+
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Set environment variables
+cp .env.example .env
+# Edit .env with your API keys
+
+# Run locally (development mode)
+python main.py  # Flask on port 5000
+python -m uvicorn fastapi_app:app --port 8000  # FastAPI on port 8000
+```
+
+#### Adding New Features
+
+1. **New Assessments**: Add questionnaire JSON files in `crew_ai/questionnaires/`
+2. **Custom Agents**: Modify configurations in `config/agents.yaml`
+3. **Knowledge Base**: Add PDF documents to `knowledge/` directory
+4. **UI Updates**: Modify templates in `templates/` and styles in `static/`
+
+#### Docker Testing
+
+Test the Docker build locally before deploying:
+
+```bash
+# Build the Docker image
+docker build -t mental-health-app .
+
+# Run locally with Docker
+docker run -p 10000:10000 --env-file .env mental-health-app
+
+# Test health endpoints
+curl http://localhost:10000/health
+```
 
 ## 🔧 Configuration
 
-### Agent Configuration (`config/agents.yaml`)
-Configure AI agent behaviors, roles, and capabilities:
+### Environment Variables Reference
+
+| Variable | Required | Description | Default |
+|----------|----------|-------------|---------|
+| `GOOGLE_API_KEY` | Yes | Google AI API key | - |
+| `GROQ_API_KEY` | Yes | Groq API key | - |
+| `OPENAI_API_KEY` | Yes | OpenAI API key | - |
+| `SECRET_KEY` | Yes | Flask secret key | - |
+| `PORT` | No | Application port | 10000 |
+| `FLASK_ENV` | No | Flask environment | production |
+| `DEBUG` | No | Debug mode | false |
+| `ALLOWED_ORIGINS` | No | CORS origins | * |
+
+### Agent Configuration
+
+The AI agents can be configured via `config/agents.yaml`:
+
 ```yaml
 emotion_detector:
   role: Emotion Detector
   goal: Analyze user input to determine their emotional state
   backstory: You are an empathetic AI skilled at identifying emotions
+
+crisis_detector:
+  role: Crisis Detector
+  goal: Identify potential mental health emergencies
+  backstory: You are trained to recognize signs of crisis
 ```
 
-### RAG Configuration (`config/rag.yaml`)
-Configure retrieval-augmented generation settings:
+### RAG Configuration
+
+Knowledge retrieval settings in `config/rag.yaml`:
+
 ```yaml
 vector_store:
-  collection_name: mental_health_docs
-  embedding_model: sentence-transformers/all-MiniLM-L6-v2
-```
-
-### Task Configuration (`config/tasks.yaml`)
-Define task flows and dependencies for the multi-agent system.
-
-## 🗃️ Database Schema
-
-### Users Table
-- `id`: Primary key
-- `username`: Unique username
-- `email`: User email address
-- `password_hash`: Encrypted password
-- `created_at`: Account creation timestamp
-
-### User Assessments
-- Links users to completed assessments
-- Stores scores and timestamps
-- Tracks assessment types and results
-
-### Conversation History
-- Stores chat messages and responses
-- Links to user sessions
-- Includes sentiment analysis results
-
-## 🤖 AI Agents Overview
-
-### Crisis Detection Agent
-- **Purpose**: Identifies mental health emergencies
-- **Tools**: Crisis classification algorithms
-- **Response**: Immediate escalation and resource provision
-
-### Mental Condition Classifier
-- **Purpose**: Categorizes user concerns
-- **Tools**: NLP classification models
-- **Output**: Condition type and confidence score
-
-### RAG Retriever Agent
-- **Purpose**: Finds relevant knowledge base content
-- **Tools**: Vector similarity search
-- **Output**: Relevant document excerpts
-
-### Assessment Conductor
-- **Purpose**: Administers standardized questionnaires
-- **Tools**: Questionnaire management system
-- **Output**: Assessment scores and interpretations
-
-### Response Generator
-- **Purpose**: Creates empathetic, helpful responses
-- **Tools**: Language models and response templates
-- **Output**: Contextual, supportive messages
-
-## 🔒 Security and Privacy
-
-### Data Protection
-- Passwords are hashed using secure algorithms
-- Session management with secure cookies
-- Option for anonymous guest sessions
-- User data deletion capabilities
-
-### Privacy Features
-- No persistent storage for guest users
-- Secure session management
-- Optional account deletion
-- Data minimization practices
-
-## 📊 Monitoring and Analytics
-
-### Sentiment Tracking
-- Real-time emotion analysis
-- Conversation sentiment trends
-- User mood tracking over time
-
-### Assessment Analytics
-- Score tracking and trends
-- Risk factor identification
-- Progress monitoring
-
-### System Monitoring
-- Agent performance metrics
-- Response time tracking
-- Error logging and monitoring
-
-## 🐳 Docker Deployment
-
-Build and run using Docker:
-
-```bash
-# Build the image
-docker build -t mental-health-app .
-
-# Run the container
-docker run -p 5000:5000 -p 8000:8000 mental-health-app
-```
-
-## 🔧 Troubleshooting
-
-### Common Issues
-
-#### 1. Import Errors
-- Ensure all dependencies are installed: `pip install -r requirements.txt`
-- Check Python version compatibility (>=3.11)
-
-#### 2. Database Issues
-- Initialize database: `python -c "from main import init_db; init_db()"`
-- Check file permissions for SQLite database
-
-#### 3. API Key Errors
-- Verify `.env` file configuration
-- Ensure API keys are valid and active
-
-#### 4. Voice Features Not Working
-- Check microphone permissions in browser
-- Verify Whisper model installation
-- Ensure audio file formats are supported
-
-#### 5. Agent Response Issues
-- Check FastAPI backend is running on port 8000
-- Verify agent configurations in `config/` directory
-- Review logs for specific error messages
-
-### Debug Mode
-Enable debug mode for detailed error information:
-```python
-app.run(debug=True, host='0.0.0.0', port=5000)
+  chunk_size: 1000
+  chunk_overlap: 200
+  
+retrieval:
+  top_k: 5
+  similarity_threshold: 0.7
 ```
 
 ## 🤝 Contributing
 
-### Development Setup
 1. Fork the repository
-2. Create a feature branch
-3. Follow the existing code style
-4. Add tests for new functionality
-5. Submit a pull request
-
-### Code Standards
-- Follow PEP 8 for Python code
-- Use meaningful variable and function names
-- Add docstrings for complex functions
-- Include error handling and logging
-
-### Testing
-- Run existing tests before submitting changes
-- Add tests for new features
-- Ensure all agents work correctly in isolation
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## 📄 License
 
-This project is licensed under the MIT License. See the LICENSE file for details.
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-## 🆘 Support and Resources
+## 🆘 Support
 
-### Mental Health Resources
-- **Crisis Hotlines**: Immediate help for mental health emergencies
-- **Professional Services**: Information about therapy and counseling
-- **Self-Help Resources**: Coping strategies and wellness tips
-
-### Technical Support
+For issues and questions:
+- Create an issue on GitHub
 - Check the troubleshooting section above
-- Review system logs for detailed error information
-- Consult the API documentation at `/docs` endpoint
+- Review Render deployment logs
 
-### Community
-- Report bugs and request features through GitHub issues
-- Contribute to the project following the contribution guidelines
-- Share feedback and suggestions for improvement
+## 🔒 Security
+
+- All user data is encrypted in transit
+- Passwords are hashed using bcrypt
+- Session management with secure cookies
+- API keys are stored as environment variables
+- No sensitive data in logs or version control
 
 ---
 
