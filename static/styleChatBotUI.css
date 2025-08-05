@@ -1,0 +1,868 @@
+/* Chatbot UI Stylesheet */
+/* This stylesheet is designed to create a modern and user-friendly chatbot interface. */
+body {
+    /* background-color: #f5f5f5; */
+    /* background-image: url(/vecteezy_modern-simple-abstract-pattern_.jpg); */
+    background-color: hsl(47.1, 69%, 90%);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+.chat-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: linear-gradient(to right top, #dfc665, #6ceb8c);
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    height: 90vh;
+    display: flex;
+    flex-direction: column;
+}
+.chat-header {
+    padding: 15px 20px;
+    border-bottom: 1px solid #eaeaea;
+    background: linear-gradient(to bottom top,  #6ceb8c,#dfc665);
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+}
+.chat-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+.chat-footer {
+    padding: 15px;
+    border-top: 1px solid #eaeaea;
+    background: linear-gradient(to top bottom ,#dfc665,#6ceb8c);
+    border-bottom-left-radius: 15px;
+    border-bottom-right-radius: 15px;
+}
+.message {
+    max-width: 80%;
+    margin-bottom: 15px;
+    padding: 10px 15px;
+    border-radius: 15px;
+    position: relative;
+}
+.user-message {
+    background-color: #e3f2fd;
+    color: #000;
+    align-self: flex-end;
+    border-bottom-right-radius: 0;
+}
+.assistant-message {
+    background-color: #f5f5f5;
+    color: #000;
+    align-self: flex-start;
+    border-bottom-left-radius: 0;
+}
+.agent-tag {
+    display: inline-block;
+    background-color: #ebf5ff;
+    color: #0d6efd;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.8em;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+.message-input {
+    border-radius: 20px;
+    padding: 10px 15px;
+    resize: none;
+}
+.file-upload-container {
+    position: relative;
+    overflow: hidden;
+    display: inline-block;
+}
+.file-upload-btn {
+    border: none;
+    color: white;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+}
+.file-upload-input {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 0;
+    padding: 0;
+    font-size: 20px;
+    cursor: pointer;
+    opacity: 0;
+    filter: alpha(opacity=0);
+}
+.preview-container {
+    margin-top: 10px;
+    display: none;
+}
+.preview-voice {
+    max-width: 100px;
+    max-height: 100px;
+    border-radius: 5px;
+}
+.result-image {
+    max-width: 300px;
+    max-height: 300px;
+    border-radius: 5px;
+    margin-top: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+.image-side-by-side {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+}
+.image-container {
+    flex: 1;
+    min-width: 200px;
+}
+.image-caption {
+    font-size: 0.85em;
+    text-align: center;
+    margin-top: 5px;
+    color: #666;
+}
+.thinking {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+}
+.dot {
+    height: 8px;
+    width: 8px;
+    margin-right: 5px;
+    background-color: #0d6efd;
+    border-radius: 50%;
+    display: inline-block;
+    animation: pulse 1.5s infinite ease-in-out;
+}
+.dot:nth-child(2) {
+    animation-delay: 0.3s;
+}
+.dot:nth-child(3) {
+    animation-delay: 0.6s;
+}
+@keyframes pulse {
+    0% { transform: scale(0.8); opacity: 0.5; }
+    50% { transform: scale(1.2); opacity: 1; }
+    100% { transform: scale(0.8); opacity: 0.5; }
+}
+.sidebar {
+    background: linear-gradient(to right top, #dfc665, #6ceb8c);
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    height: 90vh;
+    overflow-y: auto;
+}
+.sidebar h5 {
+    margin-bottom: 15px;
+    border-bottom: 1px solid #eaeaea;
+    padding-bottom: 10px;
+}
+.agent-info {
+    margin-bottom: 15px;
+}
+.agent-info h6 {
+    color: #0d6efd;
+}
+
+.welcome{
+    font-size: x-large;
+}
+.list-group{
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    --bs-list-group-border-color: none;
+}
+.list-group-item {
+    background-color: transparent;
+   
+}
+.card-btn{
+    background-color:#646e3a; 
+    border-color:#646e3a;
+    border-radius: 4px;
+    color: aliceblue;
+
+
+}
+.card-btn:hover {
+color: var(--bs-btn-hover-color);
+background-color: #242427;
+border-color:
+#242427;
+}
+
+
+
+
+.structured-response {
+    line-height: 1.6;
+}
+
+.structured-response .empathy-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    border-left: 4px solid #4a69bd;
+}
+
+.structured-response .solution-section {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    border-left: 4px solid #eb4d4b;
+}
+
+.structured-response .recommendations-section {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    color: white;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    border-left: 4px solid #0abde3;
+}
+
+.structured-response .section-title {
+    font-weight: bold;
+    font-size: 1.1em;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.message-content ul {
+    padding-left: 20px;
+}
+
+.message-content li {
+    margin-bottom: 5px;
+}
+
+/* Add these styles to styleChatBotUI.css */
+
+/* Assessment Summary Styles */
+.assessment-summary {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 15px;
+    margin: 15px 0;
+    border: 1px solid #e9ecef;
+}
+
+.assessment-summary h4 {
+    color: #495057;
+    margin-bottom: 15px;
+    font-size: 16px;
+    border-bottom: 2px solid #667eea;
+    padding-bottom: 5px;
+}
+
+.assessment-summary h5 {
+    color: #6c757d;
+    font-size: 14px;
+    margin: 10px 0 8px 0;
+    font-weight: 600;
+}
+
+.basic-info ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.basic-info li {
+    padding: 4px 0;
+    font-size: 13px;
+    border-bottom: 1px solid #f1f3f4;
+}
+
+.basic-info li:last-child {
+    border-bottom: none;
+}
+
+.score-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.score-item {
+    display: flex;
+    flex-direction: column;
+    background: white;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #e9ecef;
+}
+
+.test-name {
+    font-weight: 600;
+    font-size: 12px;
+    color: #495057;
+}
+
+.score {
+    font-size: 11px;
+    color: #6c757d;
+}
+
+.level {
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-top: 4px;
+    font-weight: 500;
+}
+
+.level.normal {
+    background: #d4edda;
+    color: #155724;
+}
+
+.level.concern {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.overall-status {
+    margin-top: 15px;
+}
+
+.status {
+    padding: 8px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    text-align: center;
+}
+
+.status.normal {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.status.alert {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+.emergency-alert {
+    background: #f8d7da;
+    border: 1px solid #f5c6cb;
+    border-radius: 6px;
+    padding: 10px;
+    margin-top: 15px;
+}
+
+.emergency-alert h5 {
+    color: #721c24;
+    margin-bottom: 8px;
+}
+
+.emergency-alert p {
+    color: #721c24;
+    font-size: 12px;
+    margin-bottom: 8px;
+}
+
+.emergency-alert ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.emergency-alert li {
+    color: #721c24;
+    font-size: 11px;
+    padding: 2px 0;
+}
+
+.no-assessment {
+    text-align: center;
+    padding: 20px;
+    color: #6c757d;
+}
+
+.no-assessment p {
+    margin-bottom: 15px;
+    font-size: 14px;
+}
+
+.guest-info {
+    text-align: center;
+    padding: 20px;
+    color: #6c757d;
+}
+
+.guest-info h3 {
+    color: #495057;
+    margin-bottom: 10px;
+}
+
+.guest-info p {
+    margin-bottom: 15px;
+    font-size: 14px;
+}
+
+/* Add these styles to static/styleChatBotUI.css */
+
+/* Assessment Summary Styles */
+.assessment-summary {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 15px;
+    margin: 15px 0;
+    border: 1px solid #e9ecef;
+}
+
+.assessment-summary h4 {
+    color: #495057;
+    margin-bottom: 15px;
+    font-size: 16px;
+    border-bottom: 2px solid #667eea;
+    padding-bottom: 5px;
+}
+
+.assessment-summary h5 {
+    color: #6c757d;
+    font-size: 14px;
+    margin: 10px 0 8px 0;
+    font-weight: 600;
+}
+
+.basic-info ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.basic-info li {
+    padding: 4px 0;
+    font-size: 13px;
+    border-bottom: 1px solid #f1f3f4;
+}
+
+.basic-info li:last-child {
+    border-bottom: none;
+}
+
+.score-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.score-item {
+    display: flex;
+    flex-direction: column;
+    background: white;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #e9ecef;
+}
+
+.test-name {
+    font-weight: 600;
+    font-size: 12px;
+    color: #495057;
+}
+
+.score {
+    font-size: 11px;
+    color: #6c757d;
+}
+
+.level {
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-top: 4px;
+    font-weight: 500;
+}
+
+.level.normal {
+    background: #d4edda;
+    color: #155724;
+}
+
+.level.concern {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.overall-status .status.normal {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.overall-status .status.alert {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+.emergency-alert {
+    background: #f8d7da;
+    border: 1px solid #f5c6cb;
+    border-radius: 6px;
+    padding: 10px;
+    margin-top: 15px;
+}
+
+.emergency-alert h5 {
+    color: #721c24;
+    margin-bottom: 8px;
+}
+
+.emergency-alert p {
+    color: #721c24;
+    font-size: 12px;
+    margin-bottom: 8px;
+}
+
+.emergency-alert ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.emergency-alert li {
+    color: #721c24;
+    font-size: 11px;
+    padding: 2px 0;
+}
+
+.no-assessment {
+    text-align: center;
+    padding: 20px;
+    color: #6c757d;
+}
+
+.guest-info {
+    text-align: center;
+    padding: 20px;
+    color: #6c757d;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .assessment-summary {
+        padding: 10px;
+        margin: 10px 0;
+    }
+    
+    .assessment-summary h4 {
+        font-size: 14px;
+    }
+    
+    .basic-info li {
+        font-size: 12px;
+    }
+}
+
+/* Add to static/styleChatBotUI.css */
+
+.user-status {
+    background: #f8f9fa;
+    padding: 12px;
+    border-radius: 8px;
+    margin: 15px 0;
+    border: 1px solid #e9ecef;
+}
+
+.user-status .badge {
+    font-size: 0.85em;
+    padding: 4px 8px;
+}
+
+.badge.bg-success {
+    background-color: #28a745 !important;
+    color: white;
+}
+
+.badge.bg-warning {
+    background-color: #ffc107 !important;
+    color: #212529 !important;
+}
+
+.assessment-summary {
+    background: #ffffff;
+    border: 1px solid #e3f2fd;
+    border-radius: 10px;
+    padding: 15px;
+    margin: 15px 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.assessment-summary h4 {
+    color: #1976d2;
+    margin-bottom: 15px;
+    font-size: 1.1em;
+}
+
+.assessment-summary h5 {
+    color: #424242;
+    margin: 10px 0 5px 0;
+    font-size: 0.95em;
+}
+
+.basic-info ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.basic-info li {
+    padding: 4px 0;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 0.9em;
+}
+
+.basic-info li:last-child {
+    border-bottom: none;
+}
+
+.score-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    margin: 5px 0;
+    border-left: 3px solid #17a2b8;
+}
+
+.test-name {
+    font-weight: 600;
+    color: #495057;
+    font-size: 0.85em;
+}
+
+.score {
+    font-weight: bold;
+    color: #007bff;
+    font-size: 0.9em;
+}
+
+.level {
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75em;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.level.normal {
+    background: #d4edda;
+    color: #155724;
+}
+
+.level.concern {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.overall-status {
+    margin: 15px 0;
+    text-align: center;
+}
+
+.status {
+    padding: 10px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9em;
+}
+
+.status.normal {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.status.alert {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.emergency-alert {
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 8px;
+    padding: 12px;
+    margin: 15px 0;
+}
+
+.emergency-alert h5 {
+    color: #856404;
+    margin-bottom: 8px;
+}
+
+.emergency-alert ul {
+    margin: 8px 0 0 20px;
+    font-size: 0.85em;
+}
+
+.assessment-actions {
+    text-align: center;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #e9ecef;
+}
+
+.assessment-actions .btn {
+    font-size: 0.85em;
+    padding: 6px 12px;
+}
+
+.no-assessment {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    margin: 15px 0;
+    border: 1px dashed #dee2e6;
+}
+
+.no-assessment p {
+    color: #6c757d;
+    margin-bottom: 15px;
+    font-size: 0.9em;
+}
+
+.guest-info {
+    background: #e3f2fd;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    margin: 15px 0;
+    border: 1px solid #bbdefb;
+}
+
+.guest-info h3 {
+    color: #1976d2;
+    margin-bottom: 10px;
+}
+
+.guest-info p {
+    color: #424242;
+    margin-bottom: 15px;
+    font-size: 0.9em;
+}
+
+.sidebar-actions {
+    border-top: 2px solid #e9ecef;
+    padding-top: 15px;
+}
+
+.sidebar-actions .btn {
+    font-size: 0.9em;
+    font-weight: 500;
+    border: 2px solid;
+    transition: all 0.3s ease;
+}
+
+.sidebar-actions .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+
+  #delete-account {
+        transition: all 0.3s ease;
+        border: 2px solid #dc3545 !important;
+        color: #dc3545 !important;
+        background-color: transparent;
+    }
+    
+    #delete-account:hover {
+        background-color: #dc3545 !important;
+        color: white !important;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+    }
+    
+    #delete-account:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+    
+    /* Warning styling for delete confirmation */
+    .delete-warning {
+        border: 2px solid #dc3545;
+        background-color: #f8d7da;
+        color: #721c24;
+        padding: 15px;
+        border-radius: 8px;
+        margin: 10px 0;
+    }
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .assessment-summary {
+        padding: 10px;
+        margin: 10px 0;
+    }
+    
+    .assessment-summary h4 {
+        font-size: 1em;
+    }
+    
+    .basic-info li {
+        font-size: 0.85em;
+    }
+    
+    .score-item {
+        padding: 6px 8px;
+    }
+    
+    .test-name, .score {
+        font-size: 0.8em;
+    }
+    
+    .level {
+        font-size: 0.7em;
+        padding: 1px 6px;
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .assessment-summary {
+        padding: 10px;
+        margin: 10px 0;
+    }
+    
+    .assessment-summary h4 {
+        font-size: 14px;
+    }
+    
+    .basic-info li {
+        font-size: 12px;
+    }
+}
+
+
+@media (max-width: 768px) {
+    .sidebar {
+        height: auto;
+        margin-bottom: 15px;
+    }
+}

@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  mental-health-app:
+    build: .
+    ports:
+      - "5000:5000"
+      - "8000:8000"
+    environment:
+      - FLASK_ENV=development
+      - DEBUG=true
+      - PYTHONPATH=/app
+    volumes:
+      - .:/app
+      - app_data:/app/data
+      - app_logs:/app/logs
+    restart: unless-stopped
+    command: python start_services.py
+
+volumes:
+  app_data:
+  app_logs:

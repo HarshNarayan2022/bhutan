@@ -1,0 +1,1700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mental Health Assistant</title>
+    <link rel="icon" type="image/png" href="https://img.icons8.com/fluency/48/chromatography.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../static/styleChatBotUI.css">
+</head>
+<body>
+    <div class="container-fluid py-4">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 mb-3">
+
+                
+                <div class="sidebar">
+                    <div class="user-info">
+                        {% if session.user_data and session.user_data.name != 'Guest' %}
+                            <div class="user-profile">
+                                <h3>👤 Welcome, {{ session.user_data.name }}!</h3>
+                                
+                                <!-- User Status -->
+                                <div class="user-status">
+                                    <p><strong>Account Status:</strong> 
+                                        {% if session.user_data.has_completed_survey %}
+                                            <span class="badge bg-success">Assessment Complete</span>
+                                        {% else %}
+                                            <span class="badge bg-warning">No Assessment</span>
+                                        {% endif %}
+                                    </p>
+                                    {% if session.user_data.assessment_date %}
+                                    <p><strong>Last Assessment:</strong> {{ session.user_data.assessment_date }}</p>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Assessment Information Section -->
+                                {% if session.assessment_data %}
+                                <div class="assessment-summary">
+                                    <h4>📋 Assessment Summary</h4>
+                                    <div class="basic-info">
+                                        <h5>Basic Information:</h5>
+                                        <ul>
+                                            <li><strong>Age:</strong> {{ session.assessment_data.basic_info.age }}</li>
+                                            <li><strong>Gender:</strong> {{ session.assessment_data.basic_info.gender }}</li>
+                                            <li><strong>Location:</strong> {{ session.assessment_data.basic_info.location }}</li>
+                                            <li><strong>Current Mood:</strong> {{ session.assessment_data.basic_info.emotion }}</li>
+                                            {% if session.assessment_data.basic_info.days_indoors %}
+                                            <li><strong>Days Indoors:</strong> {{ session.assessment_data.basic_info.days_indoors }}</li>
+                                            {% endif %}
+                                            {% if session.assessment_data.basic_info.history_of_mental_illness %}
+                                            <li><strong>Mental Health History:</strong> {{ session.assessment_data.basic_info.history_of_mental_illness }}</li>
+                                            {% endif %}
+                                            {% if session.assessment_data.basic_info.treatment %}
+                                            <li><strong>Current Treatment:</strong> {{ session.assessment_data.basic_info.treatment }}</li>
+                                            {% endif %}
+                                        </ul>
+                                    </div>
+                                    
+                                    {% if session.assessment_data.assessment_result and session.assessment_data.assessment_result.detailed_scores %}
+                                    <div class="assessment-scores">
+                                        <h5>Assessment Results:</h5>
+                                        <div class="score-summary">
+                                            {% for test_name, scores in session.assessment_data.assessment_result.detailed_scores.items() %}
+                                            <div class="score-item">
+                                                <span class="test-name">{{ test_name }}:</span>
+                                                <span class="score">{{ scores.score }}/{{ scores.max_score }}</span>
+                                                <div class="level {{ 'concern' if 'severe' in scores.level.lower() or 'moderate' in scores.level.lower() else 'normal' }}">
+                                                    {{ scores.level }}
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="overall-status">
+                                        <h5>Overall Status:</h5>
+                                        <div class="status {{ 'alert' if 'concern' in session.assessment_data.assessment_result.overall_status.lower() else 'normal' }}">
+                                            {{ session.assessment_data.assessment_result.overall_status }}
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    {% if session.assessment_data.assessment_result and session.assessment_data.assessment_result.emergency_info %}
+                                    <div class="emergency-alert">
+                                        <h5>⚠️ Important:</h5>
+                                        <p>{{ session.assessment_data.assessment_result.emergency_info.message }}</p>
+                                        <ul>
+                                            {% for resource in session.assessment_data.assessment_result.emergency_info.resources %}
+                                            <li>{{ resource }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    <div class="assessment-actions">
+                                        <a href="{{ url_for('assessment') }}" class="btn btn-sm btn-outline-primary">
+                                            🔄 Retake Assessment
+                                        </a>
+                                    </div>
+                                </div>
+                                {% else %}
+                                <div class="no-assessment">
+                                    <p>No assessment completed yet.</p>
+                                    <a href="{{ url_for('assessment') }}" class="btn btn-sm btn-outline-primary">Take Assessment</a>
+                                </div>
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <div class="guest-info">
+                                <h3>👋 Hello, Guest!</h3>
+                                <p>You're using the chatbot as a guest. Sign up to save your assessment and chat history.</p>
+                                <a href="{{ url_for('home') }}" class="btn btn-sm btn-outline-primary">Sign Up for Full Features</a>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Action Buttons Section - ONLY ONE SET -->
+                    <div class="sidebar-actions mt-4">
+                        <button id="clear-chat" class="btn btn-outline-danger w-100 mb-2">
+                            <i class="fas fa-trash-alt me-2"></i> Clear Chat
+                        </button>
+                        
+                        {% if session.user_data and session.user_data.name != 'Guest' %}
+                        <button id="clear-history" class="btn btn-outline-warning w-100 mb-2">
+                            <i class="fas fa-history me-2"></i> Clear History
+                        </button>
+                        
+                        <!-- ✅ NEW: Delete Account Button -->
+                        <button id="delete-account" class="btn btn-outline-danger w-100 mb-2" style="border-color: #dc3545; color: #dc3545;">
+                            <i class="fas fa-user-times me-2"></i> Delete Account
+                        </button>
+                        {% endif %}
+                        
+                        <button id="end-session" class="btn btn-outline-secondary w-100">
+                            <i class="fas fa-sign-out-alt me-2"></i> End Session
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Chat Container -->
+            <div class="col-md-9">
+                <div class="chat-container">
+                    <div class="chat-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-stethoscope me-2"></i>
+                            Multi-Agent Mental Health Assistant Chatbot
+                        </h5>
+                        <small class="text-muted">Ask mental health questions via text or voice</small>
+                    </div>
+                    
+                                        
+                    <div id="chat-body" class="chat-body">
+                        <div class="message assistant-message">
+                            <div class="agent-tag">System</div>
+                            <div class="message-content">
+                                <p id="welcome-text">
+                                    {% if user_data.name == 'Guest' %}
+                                        Welcome! I'm your mental health support assistant. You can ask me questions about mental health, share your feelings, or discuss any concerns you may have. How can I help you today?
+                                    {% elif user_data.emotion and user_data.emotion != 'neutral/unsure' %}
+                                        Hi {{ user_data.name }}! I understand you're feeling {{ user_data.emotion }}. 
+                                        {% if user_data.result == 'Severe' %}
+                                            Given what you're experiencing, I want you to know that immediate support is available. How can I help you today?
+                                        {% elif user_data.result == 'Mild' %}
+                                            I'm here to provide support and guidance. What's on your mind?
+                                        {% else %}
+                                            I'm here to help you navigate through this. What would you like to talk about?
+                                        {% endif %}
+                                    {% else %}
+                                        Welcome {{ user_data.name }}! I'm your mental health support assistant. How are you feeling today?
+                                    {% endif %}
+                                </p>
+                            </div>
+                            <div class="audio-controls mt-2">
+                                <button class="btn btn-sm btn-outline-primary play-tts-btn" 
+                                        data-message-id="welcome-msg"
+                                        data-text="">
+                                    <i class="fas fa-play"></i> Play Voice Response
+                                </button>
+                                <span class="audio-status ms-2"></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                
+
+                    <div class="chat-footer">
+                    
+                        <form id="chat-form" class="d-flex align-items-end" onsubmit="return false;" action="javascript:void(0);">
+                            <!-- Voice recording button -->
+                            <button type="button" class="btn btn-warning rounded-circle me-2" id="voice-record-btn" style="width: 40px; height: 40px;">
+                                <i class="fas fa-microphone"></i>
+                            </button>
+                            
+                            <div class="flex-grow-1">
+                                <textarea id="message-input" class="form-control message-input" rows="1" placeholder="Type your message or use voice recording..."></textarea>
+                            </div>
+                            
+                            <button type="button" class="btn btn-primary rounded-circle ms-2" id="send-btn" style="width: 40px; height: 40px;">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Update the message display section -->
+<script>
+function displayMessage(message, isUser = false, agent = null, confidence = null) {
+    const chatMessages = document.getElementById('chat-messages');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+    
+    if (isUser) {
+        messageDiv.innerHTML = `
+            <div class="message-content">
+                <strong>You:</strong> ${message}
+            </div>
+        `;
+    } else {
+        // Check if this is an enhanced response with exercises and questions
+        const hasExercises = message.includes('Mental Health Exercises') || message.includes('**Mental Health Exercises:**');
+        const hasQuestions = message.includes('Follow-up Questions') || message.includes('Questions to Consider');
+        
+        // Format the enhanced response
+        let formattedMessage = formatEnhancedResponse(message);
+        
+        messageDiv.innerHTML = `
+            <div class="message-content bot-response">
+                ${formattedMessage}
+                ${agent ? `<div class="agent-info">Response by: ${agent}</div>` : ''}
+                ${confidence ? `<div class="confidence-score">Confidence: ${(confidence * 100).toFixed(1)}%</div>` : ''}
+                ${hasExercises ? '<div class="feature-tag">✨ Includes Mental Health Exercises</div>' : ''}
+                ${hasQuestions ? '<div class="feature-tag">❓ Includes Follow-up Questions</div>' : ''}
+            </div>
+        `;
+    }
+    
+    chatMessages.appendChild(messageDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function formatEnhancedResponse(message) {
+    // Enhanced formatting for better readability
+    let formatted = message
+        // Format section headers
+        .replace(/\*\*(EMPATHY\/ACKNOWLEDGMENT|SOLUTION\/INFORMATION|RECOMMENDATIONS):\*\*/g, 
+                '<h3 class="section-header">$1</h3>')
+        
+        // Format subsection headers
+        .replace(/\*\*(Mental Health Exercises|Follow-up Questions[^:]*|Next Steps):\*\*/g, 
+                '<h4 class="subsection-header">$1</h4>')
+        
+        // Format exercise items
+        .replace(/• \*\*([^:]+):\*\* ([^\n]+)/g, 
+                '<div class="exercise-item"><strong>$1:</strong> <span class="exercise-description">$2</span></div>')
+        
+        // Format regular bullet points
+        .replace(/• ([^\n]+)/g, '<li class="recommendation-item">$1</li>')
+        
+        // Format bold text
+        .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+        
+        // Format line breaks
+        .replace(/\n/g, '<br>');
+    
+    return formatted;
+}
+
+// Add CSS for enhanced formatting
+const enhancedStyles = `
+<style>
+.section-header {
+    color: #2c5530;
+    border-bottom: 2px solid #4a7c59;
+    padding-bottom: 5px;
+    margin: 15px 0 10px 0;
+    font-size: 1.1em;
+}
+
+.subsection-header {
+    color: #4a7c59;
+    margin: 10px 0 5px 0;
+    font-size: 1em;
+}
+
+.exercise-item {
+    background: #f0f8f0;
+    padding: 8px 12px;
+    margin: 5px 0;
+    border-left: 3px solid #4a7c59;
+    border-radius: 0 5px 5px 0;
+}
+
+.exercise-description {
+    color: #2c5530;
+    font-style: italic;
+}
+
+.recommendation-item {
+    margin: 5px 0;
+    padding: 3px 0;
+    list-style-type: disc;
+    margin-left: 20px;
+}
+
+.feature-tag {
+    display: inline-block;
+    background: #e8f5e8;
+    color: #2c5530;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    margin: 2px;
+    border: 1px solid #4a7c59;
+}
+
+.agent-info {
+    font-size: 0.8em;
+    color: #666;
+    margin-top: 10px;
+    font-style: italic;
+}
+
+.confidence-score {
+    font-size: 0.8em;
+    color: #4a7c59;
+    margin-top: 5px;
+    font-weight: bold;
+}
+
+.bot-response {
+    line-height: 1.6;
+}
+
+.empathy-section, .solution-section, .recommendations-section {
+    margin: 15px 0;
+    padding: 12px;
+    border-radius: 8px;
+    border-left: 4px solid;
+}
+
+.empathy-section {
+    background-color: #e3f2fd;
+    border-left-color: #2196f3;
+}
+
+.solution-section {
+    background-color: #f3e5f5;
+    border-left-color: #9c27b0;
+}
+
+.recommendations-section {
+    background-color: #e8f5e8;
+    border-left-color: #4caf50;
+}
+
+.section-title {
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #333;
+}
+
+.structured-response {
+    line-height: 1.6;
+}
+</style>
+`;
+
+// Add the enhanced styles to the page
+document.head.insertAdjacentHTML('beforeend', enhancedStyles);
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.0.2/marked.min.js"></script>
+
+<script>
+
+
+
+    // Global variables
+    let mediaRecorder;
+    let audioChunks = [];
+    let isRecording = false;
+    let currentAudio = null;
+    let isVoiceQuery = false;
+    let globalAudioController = null;
+
+    // ✅ FIXED: Safe template variable handling
+    function getUserData() {
+        try {
+            return {
+                name: '{{ session.get("user_data", {}).get("name", "Guest") | e }}' || 'Guest',
+                emotion: '{{ session.get("user_data", {}).get("emotion", "neutral") | e }}' || 'neutral',
+                result: '{{ session.get("user_data", {}).get("result", "Unknown") | e }}' || 'Unknown'
+            };
+        } catch (e) {
+            console.warn('Template variable error:', e);
+            return {
+                name: 'Guest',
+                emotion: 'neutral',
+                result: 'Unknown'
+            };
+        }
+    }
+
+    // ✅ SINGLE DOMContentLoaded listener with PROPER event binding
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('🚀 DOM loaded, initializing chat...');
+        
+        // Get elements with error checking
+        const chatBody = document.getElementById('chat-body');
+        const chatForm = document.getElementById('chat-form');
+        const messageInput = document.getElementById('message-input');
+        const sendBtn = document.getElementById('send-btn');
+        const voiceRecordBtn = document.getElementById('voice-record-btn');
+        const clearChatBtn = document.getElementById('clear-chat');
+        const clearHistoryBtn = document.getElementById('clear-history');
+        const endSessionBtn = document.getElementById('end-session');
+        // Delete account - Clean binding
+        const deleteAccountBtn = document.getElementById('delete-account');
+        if (deleteAccountBtn) {
+            deleteAccountBtn.addEventListener('click', deleteAccountHandler);
+        }
+
+        // Debug: Check if critical elements exist
+        if (!chatBody) {
+            console.error('❌ chat-body element not found!');
+            return;
+        }
+        if (!chatForm) {
+            console.error('❌ chat-form element not found!');
+            return;
+        }
+        if (!messageInput) {
+            console.error('❌ message-input element not found!');
+            return;
+        }
+        if (!sendBtn) {
+            console.error('❌ send-btn element not found!');
+            return;
+        }
+
+        console.log('✅ All critical elements found');
+
+        // Add global audio controls
+        addGlobalAudioControls();
+
+        // Check backend connection
+        checkBackendConnection();
+
+        // Load conversation history
+        loadConversationHistory();
+
+        // ✅ CRITICAL FIX: Use button click instead of form submit
+        sendBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('📤 Send button clicked');
+            handleMessageSend();
+        });
+
+        // ✅ REMOVE form submit listener entirely
+        // chatForm.addEventListener('submit', handleFormSubmission); // REMOVE THIS
+
+        // ✅ Enter key handling
+        messageInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('⌨️ Enter key pressed');
+                handleMessageSend();
+            }
+        });
+
+        // Voice recording - Clean binding
+        if (voiceRecordBtn) {
+            voiceRecordBtn.addEventListener('click', toggleRecording);
+        }
+
+        // Clear chat - Clean binding
+        if (clearChatBtn) {
+            clearChatBtn.addEventListener('click', clearChatHandler);
+        }
+
+        // Clear history - Clean binding
+        if (clearHistoryBtn) {
+            clearHistoryBtn.addEventListener('click', clearHistoryHandler);
+        }
+
+        // End session - Clean binding
+        if (endSessionBtn) {
+            endSessionBtn.addEventListener('click', endSessionHandler);
+        }
+
+        // Auto-resize textarea
+        messageInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = this.scrollHeight + 'px';
+        });
+
+        // Initialize TTS for welcome message
+        initializeTTSButtons();
+
+        console.log('✅ Chat initialization complete');
+    });
+
+    // ✅ NEW: Single message send handler
+    async function handleMessageSend() {
+        console.log('📝 Handling message send');
+        
+        const messageInput = document.getElementById('message-input');
+        const sendBtn = document.getElementById('send-btn');
+        const message = messageInput.value.trim();
+        
+        if (!message) {
+            console.log('⏭️ Empty message, skipping');
+            return;
+        }
+
+        // Prevent multiple sends
+        if (sendBtn.disabled) {
+            console.log('⏭️ Send already in progress, ignoring');
+            return;
+        }
+
+        sendBtn.disabled = true;
+        sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+        console.log('💬 Processing message:', message);
+
+        try {
+            // Add user message immediately
+            addUserMessage(message);
+            console.log('✅ User message added successfully');
+            
+            // Clear input
+            messageInput.value = '';
+            messageInput.style.height = 'auto';
+
+            // Show typing indicator
+            const typingIndicator = addTypingIndicator();
+
+            console.log('🚀 Sending request to /chat_message');
+            
+            const userData = getUserData();
+            console.log('👤 User data:', userData);
+            
+            const requestBody = {
+                message: message,
+                user_data: userData
+            };
+            console.log('📦 Request body:', JSON.stringify(requestBody, null, 2));
+
+            console.log('🌐 Making fetch request...');
+            
+            const response = await fetch('/chat_message', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+                body: JSON.stringify(requestBody)
+            });
+            
+            console.log('📡 Response received - Status:', response.status);
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('❌ Response not OK:', response.status, errorText);
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            console.log('📖 Reading response JSON...');
+            const data = await response.json();
+            console.log('✅ Parsed response data:', JSON.stringify(data, null, 2));
+            
+            // Remove typing indicator
+            removeTypingIndicator(typingIndicator);
+
+            if (data && data.response) {
+                console.log('📝 Response text length:', data.response.length);
+                console.log('📝 Agent:', data.agent);
+                console.log('📝 Adding assistant message...');
+                
+                addAssistantMessage(data.response, data.agent || 'Assistant');
+                console.log('✅ Assistant message added successfully');
+                
+                // Auto-play for voice queries
+                if (isVoiceQuery) {
+                    setTimeout(() => {
+                        const lastMessage = document.querySelector('#chat-body .message:last-child');
+                        const playButton = lastMessage?.querySelector('.play-tts-btn');
+                        if (playButton) {
+                            playButton.click();
+                        }
+                    }, 800);
+                    isVoiceQuery = false;
+                }
+            } else {
+                console.error('❌ No response in data:', data);
+                addAssistantMessage('Sorry, I received an empty response. Please try again.', 'System');
+            }
+            
+        } catch (error) {
+            console.error('❌ Error details:', error);
+            removeTypingIndicator(typingIndicator);
+            addAssistantMessage('Sorry, there was a network error. Please check your connection and try again.', 'System');
+        } finally {
+            // Re-enable send button
+            sendBtn.disabled = false;
+            sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i>';
+        }
+        
+        scrollToBottom();
+    }
+
+
+    // ✅ ADD: Backend connection check with user feedback
+    async function checkBackendConnection() {
+        try {
+            console.log('🔗 Checking FastAPI backend connection...');
+            
+            const response = await fetch('/test_backend_connection', {
+                method: 'GET',
+                timeout: 5000
+            });
+            
+            if (response.ok) {
+                console.log('✅ FastAPI backend is connected and ready');
+                return true;
+            } else {
+                console.log('⚠️ FastAPI backend responded with error:', response.status);
+                showBackendWarning();
+                return false;
+            }
+        } catch (error) {
+            console.log('❌ FastAPI backend is not available:', error.message);
+            showBackendWarning();
+            return false;
+        }
+    }
+
+        // ✅ ADD: Delete account event handler
+    function deleteAccountHandler() {
+        // Multi-step confirmation for safety
+        const userName = getUserData().name;
+        
+        // First confirmation
+        if (!confirm(`⚠️ WARNING: Are you sure you want to permanently delete your account?`)) {
+            return;
+        }
+        
+        // Second confirmation with username
+        const confirmText = prompt(
+            `🚨 FINAL WARNING: This action cannot be undone!\n\n` +
+            `Your account "${userName}" and ALL associated data will be permanently deleted, including:\n` +
+            `• Your profile information\n` +
+            `• All assessment results\n` +
+            `• Complete conversation history\n` +
+            `• All saved data\n\n` +
+            `Type "DELETE MY ACCOUNT" (exactly) to confirm:`
+        );
+        
+        if (confirmText !== "DELETE MY ACCOUNT") {
+            alert("Account deletion cancelled. The text must match exactly.");
+            return;
+        }
+        
+        // Show loading state
+        const deleteBtn = document.getElementById('delete-account');
+        if (deleteBtn) {
+            deleteBtn.disabled = true;
+            deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Deleting...';
+        }
+        
+        // Make delete request
+        fetch('/delete_account', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert('Your account has been permanently deleted. You will now be redirected to the home page.');
+                window.location.href = '/';
+            } else {
+                alert('Error deleting account: ' + (data.message || 'Unknown error'));
+                // Reset button
+                if (deleteBtn) {
+                    deleteBtn.disabled = false;
+                    deleteBtn.innerHTML = '<i class="fas fa-user-times me-2"></i> Delete Account';
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Network error occurred while deleting account. Please try again.');
+            // Reset button
+            if (deleteBtn) {
+                deleteBtn.disabled = false;
+                deleteBtn.innerHTML = '<i class="fas fa-user-times me-2"></i> Delete Account';
+            }
+        });
+    }
+
+ 
+
+    function showBackendWarning() {
+        const chatBody = document.getElementById('chat-body');
+        if (chatBody) {
+            const warningElement = document.createElement('div');
+            warningElement.className = 'message assistant-message bg-warning-subtle';
+            warningElement.innerHTML = `
+                <div class="agent-tag">System Notice</div>
+                <div class="message-content">
+                    <p>⚠️ <strong>Backend Notice:</strong> The AI assistant backend is not fully available. You'll receive basic responses while we work to restore full functionality.</p>
+                    <p><small>Please ensure FastAPI is running on port 8000, then refresh the page.</small></p>
+                </div>
+            `;
+            chatBody.appendChild(warningElement);
+            scrollToBottom();
+        }
+    }
+
+
+
+    // ✅ FIXED: Robust message display functions
+    function addUserMessage(message) {
+        const chatBody = document.getElementById('chat-body');
+        
+        if (!chatBody) {
+            console.error('❌ Chat body not found for user message!');
+            return;
+        }
+        
+        console.log('✅ Adding user message:', message);
+        
+        const userMessageElement = document.createElement('div');
+        userMessageElement.className = 'message user-message';
+        userMessageElement.innerHTML = `<p>${escapeHtml(message)}</p>`;
+        
+        chatBody.appendChild(userMessageElement);
+        scrollToBottom();
+        
+        console.log('✅ User message element added to DOM');
+    }
+
+    function addTypingIndicator() {
+        const chatBody = document.getElementById('chat-body');
+        
+        if (!chatBody) {
+            console.error('❌ Chat body not found for typing indicator!');
+            return null;
+        }
+        
+        const thinkingElement = document.createElement('div');
+        thinkingElement.className = 'message assistant-message typing-indicator';
+        thinkingElement.innerHTML = `
+            <div class="agent-tag">Assistant</div>
+            <div class="message-content">
+                <p>Thinking...</p>
+            </div>
+        `;
+        
+        chatBody.appendChild(thinkingElement);
+        scrollToBottom();
+        
+        console.log('✅ Typing indicator added');
+        return thinkingElement;
+    }
+
+    function removeTypingIndicator(typingIndicator) {
+        if (typingIndicator && typingIndicator.parentNode) {
+            typingIndicator.remove();
+            console.log('✅ Typing indicator removed');
+        }
+    }
+
+    function addAssistantMessage(message, agent = 'Assistant') {
+        const chatBody = document.getElementById('chat-body');
+        
+        if (!chatBody) {
+            console.error('❌ Chat body not found for assistant message!');
+            return;
+        }
+        
+        console.log('✅ Adding assistant message from:', agent);
+        
+        const messageId = 'msg-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+        
+        // ✅ FIXED: Simplified message formatting
+        let formattedMessage = formatMessage(message);
+        
+        const assistantMessageElement = document.createElement('div');
+        assistantMessageElement.className = 'message assistant-message';
+        
+        assistantMessageElement.innerHTML = `
+            <div class="agent-tag">${escapeHtml(agent)}</div>
+            <div class="message-content">${formattedMessage}</div>
+            <div class="audio-controls mt-2">
+                <button class="btn btn-sm btn-outline-primary play-tts-btn" 
+                        data-message-id="${messageId}" 
+                        data-text="${encodeURIComponent(message)}">
+                    <i class="fas fa-play"></i> Play Voice
+                </button>
+                <span class="audio-status ms-2"></span>
+            </div>
+        `;
+        
+        chatBody.appendChild(assistantMessageElement);
+        
+        // ✅ FIXED: Add event listener to the new play button
+        const playButton = assistantMessageElement.querySelector('.play-tts-btn');
+        const audioStatus = assistantMessageElement.querySelector('.audio-status');
+        
+        if (playButton && audioStatus) {
+            playButton.addEventListener('click', function() {
+                const text = decodeURIComponent(this.getAttribute('data-text'));
+                playMessageTTS(this, text, audioStatus);
+            });
+        }
+        
+        scrollToBottom();
+        console.log('✅ Assistant message fully added with event listeners!');
+    }
+
+    // ✅ FIXED: Simplified message formatting
+    function formatMessage(message) {
+        if (!message) return '';
+        
+        // Use marked.js if available, otherwise simple formatting
+        if (typeof marked !== 'undefined') {
+            try {
+                return marked.parse(message);
+            } catch (e) {
+                console.warn('Marked.js parsing failed, using simple formatting');
+            }
+        }
+        
+        // Simple fallback formatting
+        let formatted = escapeHtml(message);
+        
+        // Convert **bold** to <strong>
+        formatted = formatted.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+        
+        // Convert *italic* to <em>
+        formatted = formatted.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+        
+        // Convert line breaks
+        formatted = formatted.replace(/\n/g, '<br>');
+        
+        // Convert bullet points
+        formatted = formatted.replace(/• ([^\n]+)/g, '<li>$1</li>');
+        
+        return formatted;
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function scrollToBottom() {
+        const chatBody = document.getElementById('chat-body');
+        if (chatBody) {
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+    }
+
+    // ✅ FIXED: Initialize TTS buttons
+    function initializeTTSButtons() {
+        document.querySelectorAll('.play-tts-btn').forEach(button => {
+            // Remove existing listeners to prevent duplicates
+            const newButton = button.cloneNode(true);
+            button.parentNode.replaceChild(newButton, button);
+            
+            const text = newButton.getAttribute('data-text');
+            const audioStatus = newButton.parentElement.querySelector('.audio-status');
+            
+            newButton.addEventListener('click', function() {
+                playMessageTTS(this, text, audioStatus);
+            });
+        });
+    }
+
+       // ✅ MISSING: Event handler functions
+    function clearChatHandler() {
+        if (confirm('Are you sure you want to clear the current chat?')) {
+            clearChatDisplay();
+        }
+    }
+
+    async function clearHistoryHandler() {
+        if (confirm('Are you sure you want to clear your conversation history permanently?')) {
+            await clearConversationHistory();
+        }
+    }
+
+    function endSessionHandler() {
+        if (confirm('Are you sure you want to end your session?')) {
+            endUserSession();
+        }
+    }
+
+    // ✅ MISSING: Clear chat display function
+    function clearChatDisplay() {
+        if (currentAudio) {
+            stopGlobalAudio();
+        }
+        
+        const chatBody = document.getElementById('chat-body');
+        if (!chatBody) return;
+        
+        // Clear all messages
+        chatBody.innerHTML = '';
+        
+        // Add welcome message back
+        const welcomeMessage = document.createElement('div');
+        welcomeMessage.className = 'message assistant-message';
+        welcomeMessage.innerHTML = `
+            <div class="agent-tag">System</div>
+            <div class="message-content">
+                <p>Chat cleared. How can I help you today?</p>
+            </div>
+            <div class="audio-controls mt-2">
+                <button class="btn btn-sm btn-outline-primary play-tts-btn" data-text="Chat cleared. How can I help you today?">
+                    <i class="fas fa-play"></i> Play Voice Response
+                </button>
+                <span class="audio-status ms-2"></span>
+            </div>
+        `;
+        chatBody.appendChild(welcomeMessage);
+        
+        // Initialize TTS for welcome message
+        initializeTTSButtons();
+        
+        console.log('✅ Chat display cleared');
+    }
+
+    // ✅ MISSING: Clear conversation history function
+    async function clearConversationHistory() {
+        try {
+            const response = await fetch('/delete_conversation_history', {
+                method: 'POST',
+                credentials: 'include'
+            });
+            
+            if (response.ok) {
+                clearChatDisplay();
+                alert('Conversation history cleared successfully!');
+            } else {
+                alert('Failed to clear conversation history');
+            }
+        } catch (error) {
+            console.error('Error clearing history:', error);
+            alert('Error clearing conversation history');
+        }
+    }
+
+    // ✅ MISSING: End session function
+    function endUserSession() {
+        if (currentAudio) {
+            stopGlobalAudio();
+        }
+        
+        fetch('/clear_session', {
+            method: 'POST',
+            credentials: 'include'
+        }).then(response => response.json())
+        .then(data => {
+            if (data.redirect) {
+                window.location.href = data.redirect;
+            }
+        }).catch(() => {
+            window.location.href = '/';
+        });
+    }
+
+    // ✅ MISSING: Load conversation history function
+    async function loadConversationHistory() {
+        try {
+            const response = await fetch('/load_conversation_history');
+            if (response.ok) {
+                const data = await response.json();
+                const messages = data.messages || [];
+                
+                if (messages.length > 0) {
+                    const chatBody = document.getElementById('chat-body');
+                    
+                    // Clear default welcome messages
+                    const defaultMessages = chatBody.querySelectorAll('.message.assistant-message');
+                    defaultMessages.forEach(msg => {
+                        const content = msg.querySelector('.message-content p');
+                        if (content && content.textContent.includes('Welcome')) {
+                            msg.remove();
+                        }
+                    });
+                    
+                    // Add history messages
+                    messages.forEach(msg => {
+                        if (msg.role === 'user') {
+                            addUserMessage(msg.content);
+                        } else if (msg.role === 'assistant') {
+                            addAssistantMessage(msg.content, 'Assistant');
+                        }
+                    });
+                    
+                    scrollToBottom();
+                }
+            }
+        } catch (error) {
+            console.log('No conversation history available or user is guest');
+        }
+    }
+
+    // ✅ COMPLETE: Toggle recording function (was missing)
+    function toggleRecording() {
+        if (!isRecording) {
+            startRecording();
+        } else {
+            stopRecording();
+        }
+    }
+
+    // ✅ COMPLETE: Start recording function
+    function startRecording() {
+        if (currentAudio) {
+            stopGlobalAudio();
+        }
+
+        navigator.mediaDevices.getUserMedia({ 
+            audio: {
+                echoCancellation: true,
+                noiseSuppression: true,
+                autoGainControl: true,
+                sampleRate: 16000,
+                channelCount: 1
+            } 
+        })
+        .then(stream => {
+            const options = { mimeType: 'audio/webm;codecs=opus' };
+            if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+                options.mimeType = 'audio/webm';
+            }
+            
+            mediaRecorder = new MediaRecorder(stream, options);
+            audioChunks = [];
+            
+            mediaRecorder.addEventListener('dataavailable', event => {
+                if (event.data.size > 0) {
+                    audioChunks.push(event.data);
+                }
+            });
+            
+            mediaRecorder.addEventListener('stop', () => {
+                const audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType });
+                
+                if (audioBlob.size < 1000) {
+                    alert('Recording too short. Please speak for at least 2-3 seconds.');
+                    resetVoiceButton();
+                    return;
+                }
+                
+                isVoiceQuery = true;
+                transcribeSpeech(audioBlob);
+                stream.getTracks().forEach(track => track.stop());
+            });
+            
+            mediaRecorder.start(100);
+            isRecording = true;
+            
+            const voiceRecordBtn = document.getElementById('voice-record-btn');
+            voiceRecordBtn.innerHTML = '<i class="fas fa-stop"></i>';
+            voiceRecordBtn.classList.remove('btn-warning');
+            voiceRecordBtn.classList.add('btn-danger');
+            
+            setTimeout(() => {
+                if (isRecording) {
+                    stopRecording();
+                }
+            }, 10000);
+        })
+        .catch(error => {
+            console.error('Microphone error:', error);
+            alert('Could not access microphone. Please check permissions.');
+        });
+    }
+
+    // ✅ COMPLETE: Stop recording function
+    function stopRecording() {
+        if (mediaRecorder && isRecording) {
+            mediaRecorder.stop();
+            isRecording = false;
+            
+            const voiceRecordBtn = document.getElementById('voice-record-btn');
+            voiceRecordBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            voiceRecordBtn.disabled = true;
+        }
+    }
+
+    // ✅ COMPLETE: Transcribe speech function
+    function transcribeSpeech(audioBlob) {
+        const formData = new FormData();
+        formData.append('audio', audioBlob, 'recording.webm');
+        
+        fetch('/transcribe', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.transcript && data.transcript.trim()) {
+                const messageInput = document.getElementById('message-input');
+                messageInput.value = data.transcript;
+                messageInput.focus();
+                
+                isVoiceQuery = true;
+                
+                setTimeout(() => {
+                    handleMessageSend(); // ✅ FIXED: Call handleMessageSend instead of form submit
+                }, 500);
+                
+                const voiceRecordBtn = document.getElementById('voice-record-btn');
+                voiceRecordBtn.innerHTML = '<i class="fas fa-check"></i>';
+                voiceRecordBtn.classList.remove('btn-danger');
+                voiceRecordBtn.classList.add('btn-success');
+                setTimeout(resetVoiceButton, 1500);
+            } else {
+                alert(data.error || 'No speech detected. Please speak clearly and try again.');
+                resetVoiceButton();
+            }
+        })
+        .catch(error => {
+            console.error('Transcription error:', error);
+            alert('Transcription failed. Please try again.');
+            resetVoiceButton();
+        });
+    }
+
+    // ✅ COMPLETE: Reset voice button function
+    function resetVoiceButton() {
+        const voiceRecordBtn = document.getElementById('voice-record-btn');
+        if (voiceRecordBtn) {
+            voiceRecordBtn.disabled = false;
+            voiceRecordBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+            voiceRecordBtn.classList.remove('btn-danger', 'btn-success');
+            voiceRecordBtn.classList.add('btn-warning');
+        }
+    }
+
+    // ✅ MISSING: Show backend warning function
+    function showBackendWarning() {
+        const chatBody = document.getElementById('chat-body');
+        if (chatBody) {
+            const warningElement = document.createElement('div');
+            warningElement.className = 'message assistant-message bg-warning-subtle';
+            warningElement.innerHTML = `
+                <div class="agent-tag">System Notice</div>
+                <div class="message-content">
+                    <p>⚠️ <strong>Backend Notice:</strong> The AI assistant backend is not fully available. You'll receive basic responses while we work to restore full functionality.</p>
+                    <p><small>Please ensure FastAPI is running on port 8000, then refresh the page.</small></p>
+                </div>
+            `;
+            chatBody.appendChild(warningElement);
+            scrollToBottom();
+        }
+    }
+
+    // ✅ FIXED: Clear chat display
+    function clearChatDisplay() {
+        if (currentAudio) {
+            stopGlobalAudio();
+        }
+        
+        const chatBody = document.getElementById('chat-body');
+        if (!chatBody) return;
+        
+        // Clear all messages
+        chatBody.innerHTML = '';
+        
+        // Add welcome message back
+        const welcomeMessage = document.createElement('div');
+        welcomeMessage.className = 'message assistant-message';
+        welcomeMessage.innerHTML = `
+            <div class="agent-tag">System</div>
+            <div class="message-content">
+                <p>Chat cleared. How can I help you today?</p>
+            </div>
+            <div class="audio-controls mt-2">
+                <button class="btn btn-sm btn-outline-primary play-tts-btn" data-text="Chat cleared. How can I help you today?">
+                    <i class="fas fa-play"></i> Play Voice
+                </button>
+                <span class="audio-status ms-2"></span>
+            </div>
+        `;
+        chatBody.appendChild(welcomeMessage);
+        
+        // Initialize TTS for welcome message
+        initializeTTSButtons();
+        
+        console.log('✅ Chat display cleared');
+    }
+
+    async function clearConversationHistory() {
+        try {
+            const response = await fetch('/delete_conversation_history', {
+                method: 'POST',
+                credentials: 'include'
+            });
+            
+            if (response.ok) {
+                clearChatDisplay();
+                alert('Conversation history cleared successfully!');
+            } else {
+                alert('Failed to clear conversation history');
+            }
+        } catch (error) {
+            console.error('Error clearing history:', error);
+            alert('Error clearing conversation history');
+        }
+    }
+
+    function endUserSession() {
+        if (currentAudio) {
+            stopGlobalAudio();
+        }
+        
+        fetch('/clear_session', {
+            method: 'POST',
+            credentials: 'include'
+        }).then(response => response.json())
+        .then(data => {
+            if (data.redirect) {
+                window.location.href = data.redirect;
+            }
+        }).catch(() => {
+            window.location.href = '/';
+        });
+    }
+
+    // ===== AUDIO CONTROL FUNCTIONS =====
+    function addGlobalAudioControls() {
+        const globalControls = document.createElement('div');
+        globalControls.id = 'global-audio-controls';
+        globalControls.className = 'position-fixed top-0 end-0 m-3 p-2 bg-dark text-white rounded shadow';
+        globalControls.style.zIndex = '1000';
+        globalControls.style.display = 'none';
+        globalControls.innerHTML = `
+            <button id="global-pause-btn" class="btn btn-sm btn-light me-2">
+                <i class="fas fa-pause"></i>
+            </button>
+            <button id="global-stop-btn" class="btn btn-sm btn-danger">
+                <i class="fas fa-stop"></i>
+            </button>
+            <span id="global-audio-status" class="ms-2">Playing...</span>
+        `;
+        document.body.appendChild(globalControls);
+
+        document.getElementById('global-pause-btn').addEventListener('click', toggleGlobalAudio);
+        document.getElementById('global-stop-btn').addEventListener('click', stopGlobalAudio);
+    }
+
+    function showGlobalControls() {
+        const controls = document.getElementById('global-audio-controls');
+        if (controls) controls.style.display = 'block';
+    }
+
+    function hideGlobalControls() {
+        const controls = document.getElementById('global-audio-controls');
+        if (controls) controls.style.display = 'none';
+    }
+
+    function toggleGlobalAudio() {
+        if (currentAudio) {
+            const globalPauseBtn = document.getElementById('global-pause-btn');
+            const globalStatus = document.getElementById('global-audio-status');
+            
+            if (currentAudio.paused) {
+                currentAudio.play();
+                globalPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+                globalStatus.textContent = 'Playing...';
+            } else {
+                currentAudio.pause();
+                globalPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+                globalStatus.textContent = 'Paused';
+            }
+        }
+    }
+
+    function stopGlobalAudio() {
+        if (currentAudio) {
+            currentAudio.pause();
+            currentAudio.currentTime = 0;
+            currentAudio = null;
+            hideGlobalControls();
+            resetAllPlayButtons();
+        }
+    }
+
+    async function playMessageTTS(button, text, statusElement) {
+        const messageId = button.getAttribute('data-message-id');
+        const cleanText = removeMarkdown(text);
+        
+        // If this message is currently playing, toggle pause/play
+        if (currentAudio && currentAudio.dataset && currentAudio.dataset.messageId === messageId) {
+            if (!currentAudio.paused) {
+                currentAudio.pause();
+                button.innerHTML = '<i class="fas fa-play"></i> Resume';
+                statusElement.textContent = 'Paused';
+                return;
+            } else {
+                currentAudio.play();
+                button.innerHTML = '<i class="fas fa-pause"></i> Pause';
+                statusElement.textContent = 'Playing...';
+                return;
+            }
+        }
+        
+        // Stop any currently playing audio
+        if (currentAudio) {
+            stopGlobalAudio();
+        }
+        
+        // Show loading state
+        button.disabled = true;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+        statusElement.textContent = 'Generating speech...';
+        
+        try {
+            const response = await fetch('/generate-speech', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ text: cleanText })
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const audioBlob = await response.blob();
+            const audioUrl = URL.createObjectURL(audioBlob);
+            
+            currentAudio = new Audio(audioUrl);
+            currentAudio.dataset = { messageId: messageId };
+            
+            currentAudio.oncanplay = () => {
+                button.disabled = false;
+                button.innerHTML = '<i class="fas fa-pause"></i> Pause';
+                button.classList.remove('btn-outline-primary');
+                button.classList.add('btn-primary');
+                statusElement.textContent = 'Ready to play';
+            };
+            
+            currentAudio.onplay = () => {
+                button.innerHTML = '<i class="fas fa-pause"></i> Pause';
+                statusElement.textContent = 'Playing...';
+                showGlobalControls();
+            };
+            
+            currentAudio.onpause = () => {
+                button.innerHTML = '<i class="fas fa-play"></i> Resume';
+                statusElement.textContent = 'Paused';
+            };
+            
+            currentAudio.onended = () => {
+                button.innerHTML = '<i class="fas fa-play"></i> Play Again';
+                button.classList.remove('btn-primary');
+                button.classList.add('btn-outline-primary');
+                statusElement.textContent = 'Finished';
+                hideGlobalControls();
+                URL.revokeObjectURL(audioUrl);
+                currentAudio = null;
+            };
+            
+            currentAudio.onerror = (e) => {
+                console.error('Audio playback error:', e);
+                button.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Error';
+                button.disabled = false;
+                statusElement.textContent = 'Playback error';
+                hideGlobalControls();
+            };
+            
+            // Start playing
+            currentAudio.play();
+            
+        } catch (error) {
+            console.error("TTS Error:", error);
+            button.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Failed';
+            button.disabled = false;
+            statusElement.textContent = 'Generation failed';
+            hideGlobalControls();
+        }
+    }
+
+
+     // ✅ NEW: Function to sync TTS text with actual displayed text
+    function syncWelcomeMessageTTS() {
+        const welcomeTextElement = document.getElementById('welcome-text');
+        const welcomePlayButton = document.querySelector('[data-message-id="welcome-msg"]');
+        
+        if (welcomeTextElement && welcomePlayButton) {
+            const actualText = welcomeTextElement.textContent.trim();
+            welcomePlayButton.setAttribute('data-text', encodeURIComponent(actualText));
+            
+            // Add click handler
+            welcomePlayButton.addEventListener('click', function() {
+                const text = decodeURIComponent(this.getAttribute('data-text'));
+                const audioStatus = this.parentElement.querySelector('.audio-status');
+                playMessageTTS(this, text, audioStatus);
+            });
+            
+            console.log('✅ Welcome message TTS synchronized with display text');
+        }
+    }
+
+    // ✅ UPDATE: Call sync function after DOM loads
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('🚀 DOM loaded, initializing chat...');
+        
+        // ... your existing DOMContentLoaded code ...
+        
+        // Initialize TTS for welcome message
+        initializeTTSButtons();
+        
+        // ✅ ADD: Sync welcome message TTS
+        syncWelcomeMessageTTS();
+        
+        console.log('✅ Chat initialization complete');
+    });
+
+    // ✅ UPDATE: Enhanced initializeTTSButtons function
+    function initializeTTSButtons() {
+        document.querySelectorAll('.play-tts-btn').forEach(button => {
+            // Skip welcome message - handled separately
+            if (button.getAttribute('data-message-id') === 'welcome-msg') {
+                return;
+            }
+            
+            // Remove existing listeners to prevent duplicates
+            const newButton = button.cloneNode(true);
+            button.parentNode.replaceChild(newButton, button);
+            
+            const text = newButton.getAttribute('data-text');
+            const audioStatus = newButton.parentElement.querySelector('.audio-status');
+            
+            newButton.addEventListener('click', function() {
+                const decodedText = decodeURIComponent(text);
+                playMessageTTS(this, decodedText, audioStatus);
+            });
+        });
+    }
+
+    function resetAllPlayButtons() {
+        document.querySelectorAll('.play-tts-btn').forEach(btn => {
+            btn.innerHTML = '<i class="fas fa-play"></i> Play Voice';
+            btn.classList.remove('btn-primary');
+            btn.classList.add('btn-outline-primary');
+            btn.disabled = false;
+        });
+        document.querySelectorAll('.audio-status').forEach(status => {
+            status.textContent = '';
+        });
+    }
+
+    function removeMarkdown(text) {
+        if (!text) return '';
+        
+        let cleanText = text;
+        cleanText = cleanText.replace(/```[\s\S]*?```/g, ' [Code example] ');
+        cleanText = cleanText.replace(/`([^`]+)`/g, '$1');
+        cleanText = cleanText.replace(/#{1,6}\s+/g, '');
+        cleanText = cleanText.replace(/(\*\*|__)(.*?)\1/g, '$2');
+        cleanText = cleanText.replace(/(\*|_)(.*?)\1/g, '$2');
+        cleanText = cleanText.replace(/^\s*[\*\-+]\s+/gm, '. ');
+        cleanText = cleanText.replace(/^\s*\d+\.\s+/gm, '. ');
+        cleanText = cleanText.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
+        cleanText = cleanText.replace(/!\[([^\]]*)\]\([^)]+\)/g, ' [Image] ');
+        cleanText = cleanText.replace(/^\>\s+/gm, '');
+        cleanText = cleanText.replace(/\n{2,}/g, '. ');
+        cleanText = cleanText.replace(/\n/g, ' ');
+        cleanText = cleanText.replace(/\s+/g, ' ');
+        cleanText = cleanText.trim();
+        
+        if (cleanText && !cleanText.endsWith('.') && !cleanText.endsWith('!') && !cleanText.endsWith('?')) {
+            cleanText += '.';
+        }
+        
+        return cleanText;
+    }
+
+    // ===== VOICE RECORDING FUNCTIONS =====
+    function toggleRecording() {
+        if (!isRecording) {
+            startRecording();
+        } else {
+            stopRecording();
+        }
+    }
+
+    function startRecording() {
+        if (currentAudio) {
+            stopGlobalAudio();
+        }
+
+        navigator.mediaDevices.getUserMedia({ 
+            audio: {
+                echoCancellation: true,
+                noiseSuppression: true,
+                autoGainControl: true,
+                sampleRate: 16000,
+                channelCount: 1
+            } 
+        })
+        .then(stream => {
+            const options = { mimeType: 'audio/webm;codecs=opus' };
+            if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+                options.mimeType = 'audio/webm';
+            }
+            
+            mediaRecorder = new MediaRecorder(stream, options);
+            audioChunks = [];
+            
+            mediaRecorder.addEventListener('dataavailable', event => {
+                if (event.data.size > 0) {
+                    audioChunks.push(event.data);
+                }
+            });
+            
+            mediaRecorder.addEventListener('stop', () => {
+                const audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType });
+                
+                if (audioBlob.size < 1000) {
+                    alert('Recording too short. Please speak for at least 2-3 seconds.');
+                    resetVoiceButton();
+                    return;
+                }
+                
+                isVoiceQuery = true;
+                transcribeSpeech(audioBlob);
+                stream.getTracks().forEach(track => track.stop());
+            });
+            
+            mediaRecorder.start(100);
+            isRecording = true;
+            
+            const voiceRecordBtn = document.getElementById('voice-record-btn');
+            voiceRecordBtn.innerHTML = '<i class="fas fa-stop"></i>';
+            voiceRecordBtn.classList.remove('btn-warning');
+            voiceRecordBtn.classList.add('btn-danger');
+            
+            setTimeout(() => {
+                if (isRecording) {
+                    stopRecording();
+                }
+            }, 10000);
+        })
+        .catch(error => {
+            console.error('Microphone error:', error);
+            alert('Could not access microphone. Please check permissions.');
+        });
+    }
+
+    function stopRecording() {
+        if (mediaRecorder && isRecording) {
+            mediaRecorder.stop();
+            isRecording = false;
+            
+            const voiceRecordBtn = document.getElementById('voice-record-btn');
+            voiceRecordBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            voiceRecordBtn.disabled = true;
+        }
+    }
+
+    function transcribeSpeech(audioBlob) {
+        const formData = new FormData();
+        formData.append('audio', audioBlob, 'recording.webm');
+        
+        fetch('/transcribe', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.transcript && data.transcript.trim()) {
+                const messageInput = document.getElementById('message-input');
+                messageInput.value = data.transcript;
+                messageInput.focus();
+                
+                isVoiceQuery = true;
+                
+                setTimeout(() => {
+                    const chatForm = document.getElementById('chat-form');
+                    chatForm.dispatchEvent(new Event('submit'));
+                }, 500);
+                
+                const voiceRecordBtn = document.getElementById('voice-record-btn');
+                voiceRecordBtn.innerHTML = '<i class="fas fa-check"></i>';
+                voiceRecordBtn.classList.remove('btn-danger');
+                voiceRecordBtn.classList.add('btn-success');
+                setTimeout(resetVoiceButton, 1500);
+            } else {
+                alert(data.error || 'No speech detected. Please speak clearly and try again.');
+                resetVoiceButton();
+            }
+        })
+        .catch(error => {
+            console.error('Transcription error:', error);
+            alert('Transcription failed. Please try again.');
+            resetVoiceButton();
+        });
+    }
+
+    function resetVoiceButton() {
+        const voiceRecordBtn = document.getElementById('voice-record-btn');
+        if (voiceRecordBtn) {
+            voiceRecordBtn.disabled = false;
+            voiceRecordBtn.innerHTML = '<i class="fas fa-microphone"></i>';
+            voiceRecordBtn.classList.remove('btn-danger', 'btn-success');
+            voiceRecordBtn.classList.add('btn-warning');
+        }
+    }
+
+    // ===== CONVERSATION HISTORY =====
+    async function loadConversationHistory() {
+        try {
+            const response = await fetch('/load_conversation_history');
+            if (response.ok) {
+                const data = await response.json();
+                const messages = data.messages || [];
+                
+                if (messages.length > 0) {
+                    const chatBody = document.getElementById('chat-body');
+                    
+                    // Clear default welcome messages
+                    const defaultMessages = chatBody.querySelectorAll('.message.assistant-message');
+                    defaultMessages.forEach(msg => {
+                        const content = msg.querySelector('.message-content p');
+                        if (content && content.textContent.includes('Welcome')) {
+                            msg.remove();
+                        }
+                    });
+                    
+                    // Add history messages
+                    messages.forEach(msg => {
+                        if (msg.role === 'user') {
+                            addUserMessage(msg.content);
+                        } else if (msg.role === 'assistant') {
+                            addAssistantMessage(msg.content, 'Assistant');
+                        }
+                    });
+                    
+                    scrollToBottom();
+                }
+            }
+        } catch (error) {
+            console.log('No conversation history available or user is guest');
+        }
+    }
+
+async function checkBackendConnection() {
+    try {
+        console.log('🔗 Checking FastAPI backend connection...');
+        
+        const response = await fetch('/test_backend_connection', {
+            method: 'GET',
+            timeout: 5000
+        });
+        
+        if (response.ok) {
+            console.log('✅ FastAPI backend is connected and ready');
+            return true;
+        } else {
+            console.log('⚠️ FastAPI backend responded with error:', response.status);
+            return false;
+        }
+    } catch (error) {
+        console.log('❌ FastAPI backend is not available:', error.message);
+        return false;
+    }
+}
+
+
+</script>
+</body>
+</html>
+
+
+
+

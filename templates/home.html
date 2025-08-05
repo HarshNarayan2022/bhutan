@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="GreenLife Mental Health Assistant - Your personalized mental wellness companion">
+    <meta name="keywords" content="mental health, chatbot, wellness, self-assessment, coping strategies, shyness, loneliness, self esteem, life satisfaction">
+    <meta name="robots" content="INDEX, FOLLOW">
+    <link rel="stylesheet" href="{{ url_for('static', filename='stylehome.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='mediahome.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap" rel="stylesheet">
+    <title>Mental Health Chatbot - GreenLife</title>
+    <style>
+        /* Authentication modal styles */
+        .auth-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .auth-modal {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            max-width: 400px;
+            width: 90%;
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 30px;
+            cursor: pointer;
+            color: #999;
+        }
+        
+        .close-modal:hover {
+            color: #333;
+        }
+        
+        .auth-tabs {
+            display: flex;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #eee;
+        }
+        
+        .auth-tab {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .auth-tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+        
+        .auth-form {
+            display: none;
+            font-family: 'Ubuntu', sans-serif;
+        }
+        
+        .auth-form.active {
+            display: block;
+
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn-auth {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .btn-auth:hover {
+            transform: translateY(-2px);
+        }
+        
+        .guest-access {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            font-family: 'Ubuntu', sans-serif;
+        }
+        
+        .guest-link {
+            color: #667eea;
+            text-decoration: none;
+        }
+        
+        .guest-link:hover {
+            text-decoration: underline;
+        }
+        
+        /* Survey section styles */
+        /* #survey-section {
+            display: none;
+        }
+        
+        body.authenticated #survey-section {
+            display: block;
+        }
+        
+        body.authenticated .auth-prompt {
+            display: none;
+        }
+         */
+        /* Button styles */
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            display: inline-block;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            display: inline-block;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        /* Authentication prompt styles */
+        .auth-prompt {
+            min-height: 60vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Password strength indicator */
+        .password-strength {
+            font-size: 12px;
+            margin-top: 5px;
+            padding: 3px 8px;
+            border-radius: 3px;
+            display: inline-block;
+        }
+        
+        .password-strength.weak {
+            color: #dc3545;
+            background-color: #f8d7da;
+        }
+        
+        .password-strength.medium {
+            color: #856404;
+            background-color: #fff3cd;
+        }
+        
+        .password-strength.strong {
+            color: #155724;
+            background-color: #d4edda;
+        }
+        
+        .password-match-error {
+            color: #dc3545;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+        
+        /* Error and success messages */
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+            border: 1px solid #f5c6cb;
+            font-weight: 500;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 12px 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+            border: 1px solid #c3e6cb;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body class="{% if session.user_id or session.is_guest %}authenticated{% endif %}"
+      data-signup-error="{{ signup_error|default('') }}"
+      data-login-error="{{ login_error|default('') }}"
+      data-show-signup="{{ show_signup_modal|default(false)|tojson }}"
+      data-show-login="{{ show_login_modal|default(false)|tojson }}">
+
+    <nav class="navbar">
+        <ul class="nav-Links">
+            <a href="{{ url_for('home') }}">
+                <div class="logo">
+                    <img src="{{ url_for('static', filename='mental-health_12560579.png') }}" alt="logo">
+                </div>
+            </a>
+            <div class="nav-item"><li><a href="{{ url_for('home') }}">Home</a></li></div>
+            <div class="nav-item"><li><a href="{{ url_for('chatbot') }}">ChatBot</a></li></div>
+            <div class="nav-item"><li><a href="{{ url_for('about') }}">About Us</a></li></div>
+            
+            {% if session.user_id %}
+            <div class="nav-item"><li><a href="#">Welcome, {{ session.username }}</a></li></div>
+            <div class="nav-item"><li><a href="{{ url_for('logout') }}">Logout</a></li></div>
+            {% else %}
+            <div class="nav-item"><li><a href="#" onclick="showAuthModal()">Login/Sign Up</a></li></div>
+            {% endif %}
+        </ul>
+    </nav>
+
+    <!-- Authentication Modal -->
+    <div class="auth-overlay" id="authOverlay">
+        <div class="auth-modal">
+            <span class="close-modal" onclick="closeAuthModal()">&times;</span>
+            
+            <div class="auth-tabs">
+                <div class="auth-tab active" onclick="switchTab('login')">Login</div>
+                <div class="auth-tab" onclick="switchTab('signup')">Sign Up</div>
+            </div>
+            
+            <!-- Login Form -->
+            <form class="auth-form active" id="loginForm" method="POST" action="{{ url_for('login') }}">
+                {% if login_error %}
+                <div class="error-message">{{ login_error }}</div>
+                {% endif %}
+                <div class="form-group">
+                    <label for="login-username">Username or Email</label>
+                    <input type="text" class="form-control" id="login-username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <input type="password" class="form-control" id="login-password" name="password" required>
+                </div>
+                <div class="form-group">
+                    <input type="checkbox" id="remember" name="remember">
+                    <label for="remember" style="display: inline; margin-left: 5px;">Remember me</label>
+                </div>
+                <button type="submit" class="btn-auth">Login</button>
+            </form>
+            
+            <!-- Signup Form -->
+            <form class="auth-form" id="signupForm" method="POST" action="{{ url_for('signup') }}">
+                {% if signup_error %}
+                <div class="error-message">{{ signup_error }}</div>
+                {% endif %}
+                <div class="form-group">
+                    <label for="signup-fullname">Full Name</label>
+                    <input type="text" class="form-control" id="signup-fullname" name="full_name" required>
+                </div>
+                <div class="form-group">
+                    <label for="signup-username">Username</label>
+                    <input type="text" class="form-control" id="signup-username" name="username" 
+                        pattern="[a-zA-Z0-9_]{3,20}" required>
+                </div>
+                <div class="form-group">
+                    <label for="signup-email">Email</label>
+                    <input type="email" class="form-control" id="signup-email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="signup-password">Password</label>
+                    <input type="password" class="form-control" id="signup-password" name="password" 
+                        minlength="8" required>
+                    <div id="password-strength"></div>
+                </div>
+                <div class="form-group">
+                    <label for="signup-confirm">Confirm Password</label>
+                    <input type="password" class="form-control" id="signup-confirm" name="confirm_password" required>
+                    <div id="password-match-error" class="password-match-error"></div>
+                </div>
+                <button type="submit" class="btn-auth">Sign Up</button>
+            </form>
+            
+            <div class="guest-access">
+                <p>Just exploring? <a href="{{ url_for('guest_access') }}" class="guest-link">Continue as Guest</a></p>
+            </div>
+        </div>
+    </div>
+
+   <!-- Landing Page Content -->
+{% if session.user_id %}
+<section class="firstsection auth-prompt">
+    <div class="box">
+        <div class="container" style="text-align: center; padding: 50px;">
+            <h1>Welcome back, {{ session.user_data.name }}!</h1>
+            <p style="font-size: 20px; color: #667eea; margin: 20px 0;">Ready to continue your mental wellness journey?</p>
+            
+            <div style="margin-top: 30px;">
+                <a href="{{ url_for('assessment') }}" class="btn btn-primary" style="margin: 10px; font-size: 18px; padding: 15px 30px;">Take Assessment</a>
+                <a href="{{ url_for('chatbot') }}" class="btn btn-secondary" style="margin: 10px; font-size: 18px; padding: 15px 30px;">Chat with Assistant</a>
+            </div>
+        </div>
+    </div>
+</section>
+{% elif not session.user_id and not session.is_guest %}
+<section class="firstsection auth-prompt">
+    <div class="box">
+        <div class="container" style="text-align: center; padding: 50px;">
+            <h1>Welcome to GreenLife Mental Health Assistant</h1>
+            <p style="font-size: 20px; color: #667eea; margin: 20px 0;">Your Personalized Mental Wellness Companion</p>
+            
+            <div style="max-width: 800px; margin: 0 auto; text-align: left;">
+                <div style="background: #f8f9fa; padding: 30px; border-radius: 15px; margin: 30px 0;">
+                    <h2 style="color: #333; margin-bottom: 20px;">What We Offer:</h2>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <h3 style="color: #667eea;">🧠 Comprehensive Mental Health Assessment</h3>
+                        <p>Take a scientifically-backed questionnaire covering key areas of mental wellness including coping strategies, shyness levels, loneliness, self-esteem, and life satisfaction.</p>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <h3 style="color: #667eea;">💬 AI-Powered Chatbot Support</h3>
+                        <p>Get 24/7 access to our intelligent chatbot that provides personalized mental health guidance, coping strategies, and emotional support based on your assessment results.</p>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <h3 style="color: #667eea;">📊 Personalized Insights</h3>
+                        <p>Receive detailed analysis of your mental health status with actionable recommendations tailored to your specific needs and concerns.</p>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <h3 style="color: #667eea;">🔐 Private & Secure</h3>
+                        <p>Your privacy is our priority. All your data is encrypted and stored securely. You can also explore as a guest without creating an account.</p>
+                    </div>
+                </div>
+                
+                <div style="background: #e8f4fd; padding: 25px; border-radius: 15px; margin-bottom: 30px;">
+                    <h3 style="color: #0c5460; margin-bottom: 15px;">How It Works:</h3>
+                    <ol style="margin-left: 20px; line-height: 1.8;">
+                        <li><strong>Sign Up or Continue as Guest</strong> - Create a free account to save your progress or explore anonymously</li>
+                        <li><strong>Complete the Assessment</strong> - Answer questions about your mental health across multiple dimensions</li>
+                        <li><strong>Get Your Results</strong> - Receive immediate feedback on your mental health status</li>
+                        <li><strong>Chat with Our AI Assistant</strong> - Get personalized support and coping strategies</li>
+                        <li><strong>Track Your Progress</strong> - Return anytime to reassess and monitor your mental wellness journey</li>
+                    </ol>
+                </div>
+            </div>
+            
+            <div style="margin-top: 30px; display: flex; justify-content: center; flex-direction: column; align-items: center;">
+                <button class="btn btn-primary" onclick="showAuthModal()" style="margin: 10px; font-size: 18px; padding: 15px 30px;">Get Started Now</button>
+                <a href="{{ url_for('guest_access') }}" class="btn btn-secondary" style="margin: 10px; font-size: 18px; padding: 15px 30px;">Try as Guest</a>
+            </div>
+            
+            <p style="margin-top: 20px; font-style: italic; color: #666;">
+                Remember: This tool is for self-assessment and support only. If you're experiencing severe mental health issues, please consult a healthcare professional.
+            </p>
+        </div>
+    </div>
+</section>
+{% endif %} 
+    <!-- JavaScript -->
+    <script>
+    // Auth modal functions
+    function showAuthModal() {
+        document.getElementById('authOverlay').style.display = 'flex';
+    }
+    
+    function closeAuthModal() {
+        document.getElementById('authOverlay').style.display = 'none';
+    }
+    
+    function switchTab(tab) {
+        document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+        if (tab === 'login') {
+            document.querySelector('.auth-tab:nth-child(1)').classList.add('active');
+            document.getElementById('loginForm').classList.add('active');
+        } else {
+            document.querySelector('.auth-tab:nth-child(2)').classList.add('active');
+            document.getElementById('signupForm').classList.add('active');
+        }
+    }
+    
+    // Close modal when clicking outside
+    document.getElementById('authOverlay').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeAuthModal();
+        }
+    });
+    
+    document.addEventListener("DOMContentLoaded", function() {
+        // Auth modal error handling
+        const body = document.body;
+        const signupError = body.getAttribute('data-signup-error');
+        const loginError = body.getAttribute('data-login-error');
+        const showSignupModal = body.getAttribute('data-show-signup') === 'true';
+        const showLoginModal = body.getAttribute('data-show-login') === 'true';
+
+        // Handle signup errors and modal display
+        if (showSignupModal || signupError) {
+            setTimeout(() => {
+                showAuthModal();
+                switchTab('signup');
+            }, 100);
+        }
+
+        // Handle login errors and modal display
+        if (showLoginModal || loginError) {
+            setTimeout(() => {
+                showAuthModal();
+                switchTab('login');
+            }, 100);
+        }
+
+        // Password strength checker
+        const passwordInput = document.getElementById('signup-password');
+        if (passwordInput) {
+            passwordInput.addEventListener('input', function(e) {
+                const password = e.target.value;
+                const strengthDiv = document.getElementById('password-strength');
+                if (!password) {
+                    strengthDiv.textContent = '';
+                    strengthDiv.className = 'password-strength';
+                    return;
+                }
+                if (password.length < 8) {
+                    strengthDiv.textContent = 'Too short (min 8 characters)';
+                    strengthDiv.className = 'password-strength weak';
+                } else if (password.match(/^[a-zA-Z]+$/) || password.match(/^[0-9]+$/)) {
+                    strengthDiv.textContent = 'Weak - add numbers and symbols';
+                    strengthDiv.className = 'password-strength weak';
+                } else if (password.match(/^[a-zA-Z0-9]+$/)) {
+                    strengthDiv.textContent = 'Medium - add symbols';
+                    strengthDiv.className = 'password-strength medium';
+                } else {
+                    strengthDiv.textContent = 'Strong password';
+                    strengthDiv.className = 'password-strength strong';
+                }
+            });
+        }
+
+        // Real-time password match validation
+        const confirmInput = document.getElementById('signup-confirm');
+        if (confirmInput) {
+            confirmInput.addEventListener('input', function(e) {
+                const password = document.getElementById('signup-password').value;
+                const confirmPassword = e.target.value;
+                const matchError = document.getElementById('password-match-error');
+                if (confirmPassword && password !== confirmPassword) {
+                    matchError.textContent = 'Passwords do not match';
+                    e.target.style.borderColor = '#dc3545';
+                } else if (confirmPassword && password === confirmPassword) {
+                    matchError.textContent = '';
+                    e.target.style.borderColor = '#28a745';
+                } else {
+                    matchError.textContent = '';
+                    e.target.style.borderColor = '';
+                }
+            });
+        }
+
+        // Signup form validation
+        const signupForm = document.getElementById('signupForm');
+        if (signupForm) {
+            signupForm.addEventListener('submit', function(e) {
+                const password = document.getElementById('signup-password').value;
+                const confirmPassword = document.getElementById('signup-confirm').value;
+                if (password !== confirmPassword) {
+                    e.preventDefault();
+                    alert('Passwords do not match!');
+                    document.getElementById('signup-confirm').focus();
+                    return false;
+                }
+                if (password.length < 8) {
+                    e.preventDefault();
+                    alert('Password must be at least 8 characters long');
+                    document.getElementById('signup-password').focus();
+                    return false;
+                }
+            });
+        }
+    });
+    </script>
+</body>
+</html>

@@ -1,0 +1,245 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu&display=swap');
+
+*{
+
+    margin: 0;
+    padding: 0;
+}
+
+/* 
+scroller for crome AND INTERNET explorer */
+
+
+::-webkit-scrollbar{
+    width: 2em;
+}
+
+
+::-webkit-scrollbar-track{
+background: hsl(174 72% 56% / 1);
+ border-radius: 100vw;
+margin-block: .1em;
+}
+::-webkit-scrollbar-thumb{
+background: hsl(120 20% 30% / 1);
+border-radius: 100vw;
+border: .25em solid   hsl(174 72% 56% / 1);
+}
+::-webkit-scrollbar-thumb:hover{
+background: hsl(120 20% 10% / 1);
+}
+
+
+
+
+/* scroller for firefox  */
+
+@supports(scrollbar-color:rgb(11, 29, 15)  rgb(51, 235, 171) ){
+
+*{
+scrollbar-color: rgb(11, 29, 15)   rgb(51, 235, 171)  ;
+scrollbar-width: auto;
+scrollbar-arrow-color: #4b5b39;
+
+
+}
+
+}
+
+
+
+
+
+
+html{
+    scroll-behavior: smooth;
+}
+
+
+.logo{
+    width: 30%;
+    display: flex;
+    justify-content: left;
+    align-items: center;
+}
+.logo img{
+    width: 40%;
+    
+
+}
+
+
+nav{
+    padding: 1.5rem;
+    box-sizing: border-box;
+    font-family: sans-serif;
+    
+}
+
+
+.navbar{
+    width: 100%;
+    height: 10vh;
+    background:hsl(86, 82%, 63%);
+    position: sticky;
+    z-index: 3;
+    
+
+
+}
+
+
+.nav-Links{
+    display: flex;
+    list-style: none;
+    gap: 5rem;
+    font-size: 1.2rem;
+
+    width: 100%;
+    display: flex;
+    list-style: none;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+}
+
+.nav-Links a{
+    text-decoration: none;
+    color:rgb(14, 20, 6); ;
+    /* #be00ff99;color: #ca10fa; */
+    
+    font-size: 18px;
+    font-weight: bold;
+    font-family:  sans-serif;
+    position: relative;
+}
+
+.nav-item{
+    
+    position: relative;
+}
+
+.nav-Links li a::before{
+    content: '';
+    display: block;
+    height: 3.5px;
+    background:rgb(14, 20, 6);;
+    position: absolute;
+    /* top: -.75em;  */
+    bottom: -.75em; 
+    left: 0;
+    right: 0;
+    transform: scale(0,1);
+    /* transform-origin: right; */
+    /* transform-origin: left; */
+    transition: transform ease-in-out 250ms;
+
+}
+
+.nav-Links li a:hover:before{
+    transform: scale(1,1);
+
+}
+
+
+
+
+
+.background1{
+  /*  background: url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/308367/halftone-yellow.png); */
+  background: linear-gradient(to right top, #65dfc9, #6cdbeb);
+
+
+}
+
+
+
+
+.text-big{
+
+    padding: 1rem;
+    border-radius: 10px;
+    text-align: center;
+    font-size: 41px;
+    font-family: 'Ubuntu', sans-serif;
+    margin: 1%
+   
+
+}
+
+.text-small{
+    font-size: 18px;
+    margin: 5%;
+    text-align: center;
+    background: #b2dcb1;
+    border-radius: 10px;
+}
+
+
+
+
+/* body or section starts from here */
+
+
+.firstsection{
+height: 120vh;
+display: flex;
+flex-direction: row;
+justify-content: center;
+
+/* background: linear-gradient(to right top, #65dfc9, #6cdbeb); */
+background: linear-gradient(to right top, #dfc665, #6ceb8c);
+}
+
+
+.box{
+    margin:auto;
+width: 1200px;
+height: 600px;
+/*background:linear-gradient(to right top, #83ebd887, #83c0e9f0);*/
+background: linear-gradient(to right bottom, 
+rgba(255,225,225,0.7),
+rgba(255,225,225,0.3));
+z-index: 2;
+position: relative;
+border-radius: 75px;
+box-shadow: 0 0.25em 2em -2em black,
+ 0 40px 0 -20px  rgba(255,225,225,0.8) ;
+ 
+display: flex;
+flex-direction: row;
+justify-content: center;
+align-items: center;
+}
+
+
+
+.first{
+    width: 80%;
+    height: 75%;
+    /* text-align: center; */
+  
+    
+
+ 
+}
+
+.first h1{
+    font-size: 2.7rem;
+    font-weight: 50;
+    margin: 2rem;
+    font-family: 'Ubuntu', sans-serif;
+    color: #4b5b39;
+    text-align: center;
+}
+
+.first p{
+    font-family: 'Ubuntu', sans-serif;
+    font-size: 1.4rem;
+    margin-top: 2rem;
+    color: rgb(84, 80, 80);
+   line-height: 1.6em;
+    
+}
+

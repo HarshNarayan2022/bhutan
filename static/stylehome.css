@@ -1,0 +1,470 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu&display=swap');
+
+*{
+
+    margin: 0;
+    padding: 0;
+
+}
+
+/* 
+scroller for crome AND INTERNET explorer */
+
+
+    ::-webkit-scrollbar{
+        width: 2em;
+    }
+
+
+::-webkit-scrollbar-track{
+   background: hsl(174 72% 56% / 1);
+     border-radius: 100vw;
+   margin-block: .1em;
+}
+::-webkit-scrollbar-thumb{
+    background: hsl(120 20% 30% / 1);
+    border-radius: 100vw;
+    border: .25em solid   hsl(174 72% 56% / 1);
+}
+::-webkit-scrollbar-thumb:hover{
+    background: hsl(120 20% 10% / 1);
+}
+
+
+
+
+/* scroller for firefox  */
+
+@supports(scrollbar-color:rgb(11, 29, 15)  rgb(51, 235, 171) ){
+
+*{
+    scrollbar-color: rgb(11, 29, 15)   rgb(51, 235, 171)  ;
+    scrollbar-width: auto;
+    scrollbar-arrow-color: #4b5b39;
+    
+  
+}
+
+}
+
+
+
+html{
+    scroll-behavior: smooth;
+    
+}
+
+/* CSS of Navbar start */
+
+
+.logo{
+    width: 30%;
+    display: flex;
+    justify-content: left;
+    align-items: center;
+}
+.logo img{
+    width: 40%;
+    
+
+}
+
+
+nav{
+    padding: 1.5rem;
+    box-sizing: border-box;
+    font-family: sans-serif;
+    
+}
+
+
+.navbar{
+    width: 100%;
+    height: 10vh;
+    background:hsl(86, 82%, 63%);
+    position: sticky;
+    z-index: 3;
+    
+
+
+}
+
+
+.nav-Links{
+    display: flex;
+    list-style: none;
+    gap: 5rem;
+    font-size: 1.2rem;
+
+    width: 100%;
+    display: flex;
+    list-style: none;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+}
+
+.nav-Links a{
+    text-decoration: none;
+    color:rgb(14, 20, 6); ;
+    /* #be00ff99;color: #ca10fa; */
+    
+    font-size: 18px;
+    font-weight: bold;
+    font-family:  sans-serif;
+    position: relative;
+}
+
+.nav-item{
+    
+    position: relative;
+}
+
+.nav-Links li a::before{
+    content: '';
+    display: block;
+    height: 3.5px;
+    background:rgb(14, 20, 6);;
+    position: absolute;
+    /* top: -.75em;  */
+    bottom: -.75em; 
+    left: 0;
+    right: 0;
+    transform: scale(0,1);
+    /* transform-origin: right; */
+    /* transform-origin: left; */
+    transition: transform ease-in-out 250ms;
+
+}
+
+.nav-Links li a:hover:before{
+    transform: scale(1,1);
+
+}
+
+/* CSS of Navbar end */
+
+
+
+
+/* CSS of form section starts */
+.form-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.left-section, .right-section {
+    width: 50%;
+}
+.image {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.left-section .image img {
+    width: 70%;
+    height: auto;
+}
+
+.right-section {
+    padding: 20px;
+}
+
+.form-box {
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 20px;
+    background-color: transparent;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 80%;
+}
+#sub-title {
+    font-size: 24px;
+    margin-bottom: 20px;
+    font-weight: bolder;
+}
+
+
+.form-input {
+    width: 92%;
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 15px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #fff1f0;
+    text-align: center;
+}
+
+.gender-placeholder {
+    width: 100%;
+}
+
+.btn{
+    display: block;
+    margin: 50px auto;
+    width: fit-content;
+    border: 1px solid #242427;
+    color: aliceblue;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-family: 'Ubuntu', sans-serif;
+    text-decoration: none;
+    color: #242427;
+    cursor: pointer;
+  
+    /* We need this to position
+        span inside button */
+    position: relative;
+    overflow: hidden;
+    box-shadow: 6px 7px 40px -4px 
+             rgba(0, 0, 0, 0.2);
+
+}
+.btn-primary {
+    background-color:#646e3a; 
+    color: white;
+    border: none;
+    font-size: medium;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn-primary:hover {
+    background-color: #242427;
+    color: white;
+}
+/* CSS of form section starts */
+
+.firstsection{
+    height: fit-content;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    padding: 2rem 2rem;
+    align-items: center;
+    font-family: 'Ubuntu', sans-serif;
+    background: linear-gradient(to right top, #dfc665, #6ceb8c);
+    }
+    
+    
+    .box{
+        margin:auto;
+    width: 1200px;
+    height: fit-content;
+    /*background:linear-gradient(to right top, #83ebd887, #83c0e9f0);*/
+    background: linear-gradient(to right bottom, 
+    rgba(255,225,225,0.7),
+    rgba(255,225,225,0.3));
+    z-index: 2;
+    position: relative;
+    border-radius: 75px;
+    box-shadow: 0 0.25em 2em -2em black,
+     0 40px 0 -20px  rgba(255,225,225,0.8) ;
+     
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    }
+    
+    
+    
+    .first{
+        width: 80%;
+        height: 75%;
+     
+    }
+
+  
+  .container{
+    width: 100%;
+    align-items: center;
+    /* margin: 3.5em auto 0 0.8em; */
+  }
+  
+  form{
+    display: flex;
+    flex-direction: column;
+    justify-content: left;
+    align-items: start;
+    line-height: 1 rem;
+   
+    
+    
+    
+  }
+  
+  #title{
+    font-size: 2em;
+    font-family: 'Ubuntu', sans-serif;
+    font-weight: 50;
+  }
+  
+  
+  header{
+
+    margin: 2rem;
+    color: #4b5b39;
+    text-align: center;
+
+  }
+
+
+    
+#survey-form{
+    color: #4b5b39;
+    font-family: 'Ubuntu', sans-serif;
+    font-size: 1.1em;
+    font-weight: 50;
+    align-items: center;
+
+}
+
+
+
+/* Scrollable question area for each section */
+.row {
+    max-height: 350px;      /* Adjust height as needed */
+    overflow-y: auto;
+    padding-right: 10px;    /* For scrollbar space */
+    margin-bottom: 18px;
+    /* Optional: smooth scrolling */
+    scroll-behavior: smooth;
+}
+
+/* Optional: Custom scrollbar styling for Chrome/Edge */
+.row::-webkit-scrollbar {
+    width: 8px;
+}
+.row::-webkit-scrollbar-thumb {
+    background: #b5fffc;
+    border-radius: 4px;
+}
+.row::-webkit-scrollbar-track {
+    background: #f0f0f0;
+    border-radius: 4px;
+}
+
+/* Optional: Custom scrollbar for Firefox */
+.row {
+    scrollbar-width: thin;
+    scrollbar-color: #b5fffc #f0f0f0;
+       align-items: center;
+}
+
+.section-title {
+
+  font-size: 18px;
+font-family: 'Ubuntu', sans-serif;
+  background: #c1d06f;
+  width: inherit;
+  font-weight: bold;
+  margin-bottom: 6px;
+  text-align: center;
+  padding: 2px;
+  border-radius: 6px;
+}
+
+  
+
+.basic-info{
+    display: flex;
+    flex-direction: row;
+}
+  
+.gender{
+    display: flex;
+    flex-direction: row;
+}
+.gender-placeholder{
+    text-align: center;
+    color: #4b5b39;;
+}
+
+
+.question-section{
+
+    display: flex;
+    width: 50%;
+    flex-direction: column;
+    align-items: left;
+}
+
+/* .question{
+    padding-bottom: 0.5em;
+} */
+
+.rating{
+    display: flex;
+    flex-direction: column;
+}
+
+.bascic-info{
+    padding: 2px;
+}
+
+.form-control {
+  /* height: 5vh; */
+  width: fit-content;
+  font-size: 15px;
+  border: 2px solid gray;
+  border-radius: 6px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #fff1f0;
+  text-align: center;
+  margin-left: 6px;
+  padding: 6px;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease;
+}
+
+
+/* .btn:hover{
+    background:#4b5b39;
+} */
+
+
+
+.btn span {
+	position: absolute;
+	border-radius: 50%;
+	/* To make it round */
+	background-color: rgba(0, 0, 0, 0.3);
+	width: 100px;
+	height: 100px;
+	margin-top: -50px;
+	/* for positioning */
+	margin-left: -50px;
+	animation: ripple 1s;
+	opacity: 0;
+}
+/* Add animation */
+@keyframes ripple {
+	from {
+		opacity: 1;
+		transform: scale(0);
+	}
+	to {
+		opacity: 0;
+		transform: scale(10);
+	}
+}
+
+  
+
+
+
+
+/* CSS of form section end */
+  
+
+    
+
+    
+    

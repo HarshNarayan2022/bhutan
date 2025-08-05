@@ -1,0 +1,84 @@
+{
+  "timestamp": "2025-07-31T14:15:28.643684",
+  "name": "Rohit Kumar",
+  "age": 26,
+  "sex": "Male",
+  "location": "Urban",
+  "emotion": "neutral/unsure",
+  "prediction": "Mild",
+  "score": 2.72636079788208,
+  "averages": {
+    "Self_Distraction": 3.5,
+    "Denial": 2.5,
+    "Venting": 3.5,
+    "Self_Blame": 3.0,
+    "Behavioural_Disengagement": 3.0,
+    "Acceptance": 4.0,
+    "Active_Coping": 3.5,
+    "Shyness": 2.7777777777777777,
+    "Loneliness": 1.75,
+    "Self_Esteem": 3.6,
+    "Life_Satisfaction": 2.6
+  },
+  "raw_responses": {
+    "self_distraction": [
+      3.0,
+      4.0
+    ],
+    "denial": [
+      2.0,
+      3.0
+    ],
+    "venting": [
+      3.0,
+      4.0
+    ],
+    "self_blame": [
+      3.0,
+      3.0
+    ],
+    "behavioural_disengagement": [
+      3.0,
+      3.0
+    ],
+    "acceptance": [
+      4.0,
+      4.0
+    ],
+    "active_coping": [
+      3.0,
+      4.0
+    ],
+    "shyness": [
+      3.0,
+      4.0,
+      2.0,
+      2.0,
+      2.0,
+      4.0,
+      3.0,
+      3.0,
+      2.0
+    ],
+    "loneliness": [
+      2.0,
+      1.0,
+      3.0,
+      1.0
+    ],
+    "self_esteem": [
+      2.0,
+      4.0,
+      4.0,
+      4.0,
+      4.0
+    ],
+    "life_satisfaction": [
+      2.0,
+      2.0,
+      3.0,
+      4.0,
+      2.0
+    ]
+  }
+}

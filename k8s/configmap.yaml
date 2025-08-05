@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mental-health-config
+  namespace: default
+data:
+  FLASK_ENV: "production"
+  DEBUG: "false"
+  HOST: "0.0.0.0"
+  PORT: "5000"
+  FASTAPI_PORT: "8000"
+  WORKERS: "4"
+  LOG_LEVEL: "INFO"
+  WHISPER_MODEL: "tiny"
+  TTS_VOICE: "en-US-AriaNeural"
+  SESSION_COOKIE_HTTPONLY: "true"
+  SESSION_COOKIE_SAMESITE: "Lax"
+  PERMANENT_SESSION_LIFETIME: "3600"
+  MAX_UPLOAD_SIZE: "10485760"
+  RATE_LIMIT_PER_MINUTE: "60"
+  RATE_LIMIT_PER_HOUR: "1000"
+  EMBEDDING_MODEL: "sentence-transformers/all-MiniLM-L6-v2"
+  HEALTH_CHECK_INTERVAL: "30"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mental-health-secrets
+  namespace: default
+type: Opaque
+stringData:
+  SECRET_KEY: "your-super-secure-secret-key-here"
+  GOOGLE_API_KEY: "your-google-api-key-here"
+  GROQ_API_KEY: "your-groq-api-key-here"
+  OPENAI_API_KEY: "your-openai-api-key-here"
+  ELEVENLABS_API_KEY: "your-elevenlabs-api-key-here"
+  DATABASE_URL: "postgresql://user:password@postgres:5432/mental_health_app"
+  REDIS_URL: "redis://redis:6379/0"

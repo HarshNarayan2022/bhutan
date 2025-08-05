@@ -1,0 +1,24 @@
+{
+  "session_id": "20250802_165208",
+  "user_name": "Harsh Narayan",
+  "messages": [
+    {
+      "content": "Now I'm upset.",
+      "role": "user",
+      "timestamp": "2025-08-02T16:52:08.426564",
+      "topics": []
+    },
+    {
+      "agent": "RAG_AGENT",
+      "content": "I understand you're feeling upset right now. It's completely valid to experience a range of emotions, and I'm here to listen without judgment. It takes courage to acknowledge when you're feeling this way.\n\nResearch shows that sometimes upsetting feelings can arise from internal thoughts and judgments, as one source mentions getting angry and critical with oneself. It can help to practice simply listening to the voice of your thoughts without immediately judging them or trying to shut them down. This can create some space between you and the upsetting feelings.\n\nI recommend considering what might have triggered this feeling and if you can identify any specific thoughts or situations connected to it. If these feelings persist or become overwhelming, I suggest reaching out to a mental health professional for further support. Remember, taking care of your mental well-being is essential.\n",
+      "role": "assistant",
+      "timestamp": "2025-08-02T16:52:12.085676",
+      "topics": [
+        "depression"
+      ]
+    }
+  ],
+  "metadata": {
+    "topics": []
+  }
+}

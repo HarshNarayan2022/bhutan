@@ -1,0 +1,64 @@
+{
+  "PHQ-9": [
+    "Over the last 2 weeks, how often have you been bothered by any of the following problems? (Not at all, Several days, More than half the days, Nearly every day)",
+    "1. Little interest or pleasure in doing things?",
+    "2. Feeling down, depressed, or hopeless?",
+    "3. Trouble falling or staying asleep, or sleeping too much?",
+    "4. Feeling tired or having little energy?",
+    "5. Poor appetite or overeating?",
+    "6. Feeling bad about yourself - or that you are a failure or have let yourself or your family down?",
+    "7. Trouble concentrating on things, such as reading the newspaper or watching television?",
+    "8. Moving or speaking so slowly that other people could have noticed? Or the opposite - being so fidgety or restless that you have been moving around a lot more than usual?",
+    "9. Thoughts that you would be better off dead or of hurting yourself in some way?"
+  ],
+  "GAD-7": [
+    "Over the last 2 weeks, how often have you been bothered by the following problems? (Not at all, Several days, More than half the days, Nearly every day)",
+    "1. Feeling nervous, anxious, or on edge?",
+    "2. Not being able to stop or control worrying?",
+    "3. Worrying too much about different things?",
+    "4. Trouble relaxing?",
+    "5. Being so restless that it's hard to sit still?",
+    "6. Becoming easily annoyed or irritable?",
+    "7. Feeling afraid as if something awful might happen?"
+  ],
+  "DAST-10": [
+    "The following questions concern information about your involvement with drugs (excluding alcohol and tobacco) during the past 12 months. Please read each question carefully and decide which answer is appropriate for you. (Yes/No)",
+    "1. Have you used drugs other than those required for medical reasons?",
+    "2. Have you abused more than one drug at a time?",
+    "3. Are you able to stop using drugs when you want to?",
+    "4. Have you had blackouts or flashbacks from drug use?",
+    "5. Do you ever feel bad or guilty about your drug use?",
+    "6. Does your spouse (or parents) ever complain about your involvement with drugs?",
+    "7. Have you neglected your family because of your use of drugs?",
+    "8. Have you engaged in illegal activities in order to obtain drugs?",
+    "9. Have you ever experienced withdrawal symptoms (felt sick) when you stopped taking drugs?",
+    "10. Have you had medical problems as a result of your drug use (e.g., memory loss, hepatitis, convulsions, bleeding, etc.)?"
+  ],
+  "AUDIT": [
+    "Please answer the following questions based on your alcohol use over the past 12 months.",
+    "1. How often do you have a drink containing alcohol? (0) Never [Skip to Q9-10], (1) Monthly or less, (2) 2 to 4 times a month, (3) 2 to 3 times a week, (4) 4 or more times a week",
+    "2. How many drinks containing alcohol do you have on a typical day when you are drinking? (0) 1 or 2, (1) 3 or 4, (2) 5 or 6, (3) 7, 8, or 9, (4) 10 or more",
+    "3. How often do you have six or more drinks on one occasion? (0) Never, (1) Less than monthly, (2) Monthly, (3) Weekly, (4) Daily or almost daily",
+    "4. How often during the last year have you found that you were not able to stop drinking once you had started? (0–4 scale as above)",
+    "5. How often during the last year have you failed to do what was normally expected from you because of drinking? (0–4 scale as above)",
+    "6. How often during the last year have you needed a first drink in the morning to get yourself going after a heavy drinking session? (0–4 scale as above)",
+    "7. How often during the last year have you had a feeling of guilt or remorse after drinking? (0–4 scale as above)",
+    "8. How often during the last year have you been unable to remember what happened the night before because you had been drinking? (0–4 scale as above)",
+    "9. Have you or someone else been injured as a result of your drinking? (0) No, (2) Yes, but not in the last year, (4) Yes, during the last year",
+    "10. Has a relative or friend or a doctor or another health worker been concerned about your drinking or suggested you cut down? (0) No, (2) Yes, but not in the last year, (4) Yes, during the last year"
+  ],
+  "Bipolar": [
+    "Have there ever been times when you were not your usual self and...",
+    "1. You felt so good or hyper that other people thought you were not your normal self or were so hyper that you got into trouble?",
+    "2. You were so irritable that you shouted at people or started fights or arguments?",
+    "3. You felt much more self-confident than usual?",
+    "4. You got much less sleep than usual and found you didn't really miss it?",
+    "5. You were much more talkative or spoke faster than usual?",
+    "6. You had racing thoughts?",
+    "7. You were so easily distracted that you had trouble concentrating?",
+    "8. You were more active or did more things than usual?",
+    "9. You were much more social or outgoing than usual?",
+    "10. You did things that were unusual for you or that other people might have thought were excessive or risky?",
+    "11. Spending money got you or your family into trouble?"
+  ]
+}

@@ -1,0 +1,1306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="keywords" content="mental health, chatbot, wellness, self-assessment, coping strategies, shyness, loneliness, self esteem, life satisfaction">
+    <meta name="robots" content="INDEX, FOLLOW">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styleassessment.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='mediahome.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap" rel="stylesheet">
+    <title>Mental Health Chatbot</title>
+    <style>
+        /* Authentication modal styles */
+        .auth-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .auth-modal {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            max-width: 400px;
+            width: 90%;
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 30px;
+            cursor: pointer;
+            color: #999;
+        }
+        
+        .close-modal:hover {
+            color: #333;
+        }
+        
+        .auth-tabs {
+            display: flex;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #eee;
+        }
+        
+        .auth-tab {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .auth-tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+        
+        .auth-form {
+            display: none;
+        }
+        
+        .auth-form.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn-auth {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .btn-auth:hover {
+            transform: translateY(-2px);
+        }
+        
+        .guest-access {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        
+        .guest-link {
+            color: #667eea;
+            text-decoration: none;
+        }
+        
+        .guest-link:hover {
+            text-decoration: underline;
+        }
+        
+        /* Hide survey form initially */
+        #survey-section {
+            display: none;
+        }
+        
+        /* Show survey when authenticated */
+        body.authenticated #survey-section {
+            display: block;
+        }
+        
+        body.authenticated .auth-prompt {
+            display: none;
+        }
+        
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .btn-primary,.btn-success{
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            display: inline-block;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .btn-primary.btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .btn-secondary {
+                  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            display: inline-block;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .step-navigation {
+            display: flex;
+            justify-content: space-between;
+            /* margin-top: 20px; */
+        }
+        
+        /* Authentication specific styles */
+        .auth-prompt {
+            min-height: 60vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Password strength indicator */
+        .password-strength {
+            font-size: 12px;
+            margin-top: 5px;
+            padding: 3px 8px;
+            border-radius: 3px;
+            display: inline-block;
+        }
+        
+        .password-strength.weak {
+            color: #dc3545;
+            background-color: #f8d7da;
+        }
+        
+        .password-strength.medium {
+            color: #856404;
+            background-color: #fff3cd;
+        }
+        
+        .password-strength.strong {
+            color: #155724;
+            background-color: #d4edda;
+        }
+        
+        /* Add confirm password field styling */
+        .password-match-error {
+            color: #dc3545;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+            border: 1px solid #f5c6cb;
+            font-weight: 500;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 12px 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+            border: 1px solid #c3e6cb;
+            font-weight: 500;
+        }
+
+        /* Progress bar styles */
+        .progress-indicator {
+            /* margin: 20px 0; */
+            text-align: center;
+        }
+        
+        .progress-bar {
+            background: #e9ecef;
+            border-radius: 10px;
+            height: 8px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            width: 16.66%; /* Default to step 1 */
+            transition: width 0.3s ease;
+        }
+        
+        .step-counter {
+            color: #666;
+            font-size: 14px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+
+<body class="authenticated">
+
+<nav class="navbar">
+    <ul class="nav-Links">
+        <a href="{{ url_for('home') }}">
+            <div class="logo">
+                <img src="{{ url_for('static', filename='mental-health_12560579.png') }}" alt="logo">
+            </div>
+        </a>
+        <div class="nav-item"><li><a href="{{ url_for('home') }}">Home</a></li></div>
+        <div class="nav-item"><li><a href="{{ url_for('chatbot') }}">Chatbot</a></li></div>
+        <div class="nav-item"><li><a href="{{ url_for('about') }}">About Us</a></li></div>
+        <div class="nav-item"><li><a href="#">Welcome, {{ session.username }}</a></li></div>
+        <div class="nav-item"><li><a href="{{ url_for('logout') }}">Logout</a></li></div>
+    </ul>
+</nav>
+
+
+
+<!-- 
+{% if session.user_id and session.user_data.name %}
+<div class="bascic-info">
+    <label>Name:
+        <input type="text" name="Name" class="form-control" value="{{ session.user_data.name }}" readonly required>
+    </label>
+</div>
+{% else %}
+<div class="bascic-info">
+    <label>Name:
+        <input type="text" name="Name" class="form-control" required placeholder="Enter your full name">
+    </label>
+</div>
+{% endif %} -->
+
+   
+
+    <section class="firstsection" id="survey-section" style="display: block;">
+        <div class="box">
+            <div class="container">
+                <header>
+                      <h1 id="title">Mental Health Assessment - Bhutan</h1>
+                    {% if session.user_id %}
+                    <p>Welcome, {{ session.user_data.name }}! Please complete this comprehensive mental health assessment.</p>
+                    {% endif %}
+                    <div class="assessment-info">
+                        <h3>Professional Mental Health Screening</h3>
+                        <p>This assessment includes clinically validated questionnaires: PHQ-9 (Depression), GAD-7 (Anxiety), and basic wellness screening.</p>
+                        <p><strong>Important:</strong> This is a screening tool, not a diagnostic instrument. Results should be discussed with a healthcare professional.</p>
+                    </div>
+                </header>
+                <div class="form-container">
+                    <div class="left-section">
+                        <div class="image">
+                             <img src="/static/treeman.png" alt="Mental Health Assessment">
+                        </div>
+                        
+                    </div>
+                    <div class="right-section">
+                        <form id="survey-form" method="post" action="/assessment/step">
+                            <input type="hidden" name="current_step" id="current-step" value="1">
+                            <input type="hidden" name="total_steps" id="total-steps" value="6">
+                            <div class="form-box">
+                                <h2 id="sub-title">Mental Health Assessment</h2>
+                                
+                                <!-- Step 1: Basic Information -->
+                                <div class="assessment-step" id="step-1" data-step="1">
+                                    <div class="section-title">Step 1: Basic Information</div>     
+                                    <div class="row">
+                                        {% if session.user_id and session.user_data.name %}
+                                        <div class="bascic-info">
+                                            <label>Name:
+                                                <input type="text" name="Name" class="form-control" value="{{ session.user_data.name }}" readonly required>
+                                            </label>
+                                        </div>
+                                        {% else %}
+                                        <div class="bascic-info">
+                                            <label>Name:
+                                                <input type="text" name="Name" class="form-control" required placeholder="Enter your full name">
+                                            </label>
+                                        </div>
+                                        {% endif %}
+                                        <div class="bascic-info">
+                                            <label>Age:
+                                                <input class="form-control" type="number" name="Age" min="10" max="100" required>
+                                            </label>
+                                        </div>
+                                        <div class="bascic-info">
+                                            <label>Gender:
+                                                <select class="form-control" name="Sex" required>
+                                                    <option disabled selected value>Select One</option>
+                                                    <option value="Male">Male</option>
+                                                    <option value="Female">Female</option>
+                                                    <option value="Other">Other</option>
+                                                    <option value="Prefer not to say">Prefer not to say</option>
+                                                </select>
+                                            </label>
+                                        </div>
+                                        <div class="bascic-info">
+                                            <label>Location:
+                                                <select class="form-control" name="Location" required>
+                                                    <option disabled selected value>Select One</option>
+                                                    <option value="Thimphu">Thimphu</option>
+                                                    <option value="Paro">Paro</option>
+                                                    <option value="Punakha">Punakha</option>
+                                                    <option value="Wangdue">Wangdue</option>
+                                                    <option value="Other Urban">Other Urban</option>
+                                                    <option value="Rural">Rural</option>
+                                                </select>
+                                            </label>
+                                        </div>
+                                        <div class="bascic-info">
+                                            <label>Days spent indoors in the last week:
+                                                <select class="form-control" name="days_indoors" required>
+                                                    <option disabled selected value>Select One</option>
+                                                    <option value="0">0 days</option>
+                                                    <option value="1">1 day</option>
+                                                    <option value="2">2 days</option>
+                                                    <option value="3">3 days</option>
+                                                    <option value="4">4 days</option>
+                                                    <option value="5">5 days</option>
+                                                    <option value="6">6 days</option>
+                                                    <option value="7">7 days (all week)</option>
+                                                </select>
+                                            </label>
+                                        </div>
+                                        
+                                        <div class="bascic-info">
+                                            <label>How would you describe your current emotion/mood?
+                                                <select class="form-control" name="Emotion" required>
+                                                    <option disabled selected value>Select One</option>
+                                                    <option value="Very Happy">Very Happy</option>
+                                                    <option value="Happy">Happy</option>
+                                                    <option value="Neutral">Neutral</option>
+                                                    <option value="Sad">Sad</option>
+                                                    <option value="Very Sad">Very Sad</option>
+                                                    <option value="Anxious">Anxious</option>
+                                                    <option value="Angry">Angry</option>
+                                                    <option value="Stressed">Stressed</option>
+                                                    <option value="Confused">Confused</option>
+                                                    <option value="Other">Other</option>
+                                                </select>
+                                            </label>
+                                        </div>
+                                        
+                                        <div class="bascic-info">
+                                            <label>Do you have a history of mental illness?
+                                                <select class="form-control" name="history_of_mental_illness" required>
+                                                    <option disabled selected value>Select One</option>
+                                                    <option value="Yes">Yes</option>
+                                                    <option value="No">No</option>
+                                                    <option value="Unsure">Unsure</option>
+                                                    <option value="Prefer not to say">Prefer not to say</option>
+                                                </select>
+                                            </label>
+                                        </div>
+
+                                        <div class="bascic-info">
+                                            <label>Are you currently receiving any mental health treatment?
+                                                <select class="form-control" name="treatment" required>
+                                                    <option disabled selected value>Select One</option>
+                                                    <option value="Yes - Therapy/Counseling">Yes - Therapy/Counseling</option>
+                                                    <option value="Yes - Medication">Yes - Medication</option>
+                                                    <option value="Yes - Both therapy and medication">Yes - Both therapy and medication</option>
+                                                    <option value="No">No</option>
+                                                    <option value="Previously, but not currently">Previously, but not currently</option>
+                                                    <option value="Prefer not to say">Prefer not to say</option>
+                                                </select>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="step-navigation">
+                                        <button type="submit" name="action" value="next" class="btn btn-primary">Next Step</button>
+                                    </div>
+                                </div>
+
+                                <!-- Step 2: PHQ-9 Depression Screening -->
+                                <div class="assessment-step" id="step-2" data-step="2" style="display: none;">
+                                    <div class="section-title">Step 2: PHQ-9 Depression Screening</div>
+                                <div class="assessment-instructions">
+                                    <p><strong>Instructions:</strong> Over the last 2 weeks, how often have you been bothered by any of the following problems?</p>
+                                    <p><em>Scale: 0 = Not at all, 1 = Several days, 2 = More than half the days, 3 = Nearly every day</em></p>
+                                </div>
+                                <div class="row">
+                                    <div class="question-item">
+                                        <label>
+                                            <span class="question">1. Little interest or pleasure in doing things</span>
+                                            <select name="PHQ9_1" class="form-control" required>
+                                                <option disabled selected value>Select One</option>
+                                                <option value="0">Not at all</option>
+                                                <option value="1">Several days</option>
+                                                <option value="2">More than half the days</option>
+                                                <option value="3">Nearly every day</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                    <div class="question-item">
+                                        <label>
+                                            <span class="question">2. Feeling down, depressed, or hopeless</span>
+                                            <select name="PHQ9_2" class="form-control" required>
+                                                <option disabled selected value>Select One</option>
+                                                <option value="0">Not at all</option>
+                                                <option value="1">Several days</option>
+                                                <option value="2">More than half the days</option>
+                                                <option value="3">Nearly every day</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                    <div class="question-item">
+                                        <label>
+                                            <span class="question">3. Trouble falling asleep, staying asleep, or sleeping too much</span>
+                                            <select name="PHQ9_3" class="form-control" required>
+                                                <option disabled selected value>Select One</option>
+                                                <option value="0">Not at all</option>
+                                                <option value="1">Several days</option>
+                                                <option value="2">More than half the days</option>
+                                                <option value="3">Nearly every day</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                    <div class="question-item">
+                                        <label>
+                                            <span class="question">4. Feeling tired or having little energy</span>
+                                            <select name="PHQ9_4" class="form-control" required>
+                                                <option disabled selected value>Select One</option>
+                                                <option value="0">Not at all</option>
+                                                <option value="1">Several days</option>
+                                                <option value="2">More than half the days</option>
+                                                <option value="3">Nearly every day</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                    <div class="question-item">
+                                        <label>
+                                            <span class="question">5. Poor appetite or overeating</span>
+                                            <select name="PHQ9_5" class="form-control" required>
+                                                <option disabled selected value>Select One</option>
+                                                <option value="0">Not at all</option>
+                                                <option value="1">Several days</option>
+                                                <option value="2">More than half the days</option>
+                                                <option value="3">Nearly every day</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                    <div class="question-item">
+                                        <label>
+                                            <span class="question">6. Feeling bad about yourself or that you are a failure or have let yourself or your family down</span>
+                                            <select name="PHQ9_6" class="form-control" required>
+                                                <option disabled selected value>Select One</option>
+                                                <option value="0">Not at all</option>
+                                                <option value="1">Several days</option>
+                                                <option value="2">More than half the days</option>
+                                                <option value="3">Nearly every day</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                    <div class="question-item">
+                                        <label>
+                                            <span class="question">7. Trouble concentrating on things, such as reading the newspaper or watching television</span>
+                                            <select name="PHQ9_7" class="form-control" required>
+                                                <option disabled selected value>Select One</option>
+                                                <option value="0">Not at all</option>
+                                                <option value="1">Several days</option>
+                                                <option value="2">More than half the days</option>
+                                                <option value="3">Nearly every day</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                    <div class="question-item">
+                                        <label>
+                                            <span class="question">8. Moving or speaking so slowly that other people could have noticed, or being so fidgety or restless that you have been moving around a lot more than usual</span>
+                                            <select name="PHQ9_8" class="form-control" required>
+                                                <option disabled selected value>Select One</option>
+                                                <option value="0">Not at all</option>
+                                                <option value="1">Several days</option>
+                                                <option value="2">More than half the days</option>
+                                                <option value="3">Nearly every day</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                    <div class="question-item">
+                                        <label>
+                                            <span class="question">9. Thoughts that you would be better off dead or thoughts of hurting yourself in some way</span>
+                                            <select name="PHQ9_9" class="form-control" required>
+                                                <option disabled selected value>Select One</option>
+                                                <option value="0">Not at all</option>
+                                                <option value="1">Several days</option>
+                                                <option value="2">More than half the days</option>
+                                                <option value="3">Nearly every day</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                    </div>
+                                    <div class="step-navigation">
+                                        <button type="submit" name="action" value="previous" class="btn btn-secondary">Previous</button>
+                                        <button type="submit" name="action" value="next" class="btn btn-primary">Next Step</button>
+                                    </div>
+                                </div>
+
+                                <!-- Step 3: GAD-7 Anxiety Screening -->
+                                <div class="assessment-step" id="step-3" data-step="3" style="display: none;">
+                                    <div class="section-title">Step 3: GAD-7 Anxiety Screening</div>
+                                <div class="assessment-instructions">
+                                    <p><strong>Instructions:</strong> Over the last 2 weeks, how often have you been bothered by the following problems?</p>
+                                    <!-- <p><em>Scale: 0 = Not at all, 1 = Several days, 2 = More than half the days, 3 = Nearly every day</em></p> -->
+                                </div>
+                                <div class="row">
+                                    <div class="question-item">
+                                        <label>
+                                            <span class="question">1. Feeling nervous, anxious, or on edge</span>
+                                            <select name="GAD7_1" class="form-control" required>
+                                                <option disabled selected value>Select One</option>
+                                                <option value="0">Not at all</option>
+                                                <option value="1">Several days</option>
+                                                <option value="2">More than half the days</option>
+                                                <option value="3">Nearly every day</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                    <div class="question-item">
+                                        <label>
+                                            <span class="question">2. Not being able to stop or control worrying</span>
+                                            <select name="GAD7_2" class="form-control" required>
+                                                <option disabled selected value>Select One</option>
+                                                <option value="0">Not at all</option>
+                                                <option value="1">Several days</option>
+                                                <option value="2">More than half the days</option>
+                                                <option value="3">Nearly every day</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                    <div class="question-item">
+                                        <label>
+                                            <span class="question">3. Worrying too much about different things</span>
+                                            <select name="GAD7_3" class="form-control" required>
+                                                <option disabled selected value>Select One</option>
+                                                <option value="0">Not at all</option>
+                                                <option value="1">Several days</option>
+                                                <option value="2">More than half the days</option>
+                                                <option value="3">Nearly every day</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                    <div class="question-item">
+                                        <label>
+                                            <span class="question">4. Trouble relaxing</span>
+                                            <select name="GAD7_4" class="form-control" required>
+                                                <option disabled selected value>Select One</option>
+                                                <option value="0">Not at all</option>
+                                                <option value="1">Several days</option>
+                                                <option value="2">More than half the days</option>
+                                                <option value="3">Nearly every day</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                    <div class="question-item">
+                                        <label>
+                                            <span class="question">5. Being so restless that it's hard to sit still</span>
+                                            <select name="GAD7_5" class="form-control" required>
+                                                <option disabled selected value>Select One</option>
+                                                <option value="0">Not at all</option>
+                                                <option value="1">Several days</option>
+                                                <option value="2">More than half the days</option>
+                                                <option value="3">Nearly every day</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                    <div class="question-item">
+                                        <label>
+                                            <span class="question">6. Becoming easily annoyed or irritable</span>
+                                            <select name="GAD7_6" class="form-control" required>
+                                                <option disabled selected value>Select One</option>
+                                                <option value="0">Not at all</option>
+                                                <option value="1">Several days</option>
+                                                <option value="2">More than half the days</option>
+                                                <option value="3">Nearly every day</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                    <div class="question-item">
+                                        <label>
+                                            <span class="question">7. Feeling afraid as if something awful might happen</span>
+                                            <select name="GAD7_7" class="form-control" required>
+                                                <option disabled selected value>Select One</option>
+                                                <option value="0">Not at all</option>
+                                                <option value="1">Several days</option>
+                                                <option value="2">More than half the days</option>
+                                                <option value="3">Nearly every day</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                    </div>
+                                    <div class="step-navigation">
+                                        <button type="submit" name="action" value="previous" class="btn btn-secondary">Previous</button>
+                                        <button type="submit" name="action" value="next" class="btn btn-primary">Next Step</button>
+                                    </div>
+                                </div>
+
+                               
+
+                                <!-- Step 4: DAST-10 & AUDIT Screening -->
+                                <div class="assessment-step" id="step-4" data-step="4" style="display: none;">
+                                    <div class="section-title">Step 4: DAST-10 Substance Use Screening</div>
+                                    <div class="assessment-instructions">
+                                        <p><strong>Instructions:</strong> The following questions concern information about your involvement with drugs (excluding alcohol and tobacco) during the past 12 months.</p>
+                                        <p><em>Please answer honestly with Yes or No.</em></p>
+                                    </div>
+                                <div class="row">
+                                    <div class="question-item">
+                                        <label>
+                                            <span class="question">1. Have you used drugs other than those required for medical reasons?</span>
+                                            <select name="DAST_1" class="form-control" required>
+                                                <option disabled selected value>Select One</option>
+                                                <option value="No">No</option>
+                                                <option value="Yes">Yes</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                    <div class="question-item">
+                                        <label>
+                                            <span class="question">2. Have you abused more than one drug at a time?</span>
+                                            <select name="DAST_2" class="form-control" required>
+                                                <option disabled selected value>Select One</option>
+                                                <option value="No">No</option>
+                                                <option value="Yes">Yes</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                    <div class="question-item">
+                                        <label>
+                                            <span class="question">3. Are you able to stop using drugs when you want to?</span>
+                                            <select name="DAST_3" class="form-control" required>
+                                                <option disabled selected value>Select One</option>
+                                                <option value="Yes">Yes</option>
+                                                <option value="No">No</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                    <div class="question-item">
+                                        <label>
+                                            <span class="question">4. Have you had blackouts or flashbacks from drug use?</span>
+                                            <select name="DAST_4" class="form-control" required>
+                                                <option disabled selected value>Select One</option>
+                                                <option value="No">No</option>
+                                                <option value="Yes">Yes</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                    <div class="question-item">
+                                        <label>
+                                            <span class="question">5. Do you ever feel bad or guilty about your drug use?</span>
+                                            <select name="DAST_5" class="form-control" required>
+                                                <option disabled selected value>Select One</option>
+                                                <option value="No">No</option>
+                                                <option value="Yes">Yes</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                    <div class="question-item">
+                                        <label>
+                                            <span class="question">6. Does your spouse (or parents) ever complain about your involvement with drugs?</span>
+                                            <select name="DAST_6" class="form-control" required>
+                                                <option disabled selected value>Select One</option>
+                                                <option value="No">No</option>
+                                                <option value="Yes">Yes</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                    <div class="question-item">
+                                        <label>
+                                            <span class="question">7. Have you neglected your family because of your use of drugs?</span>
+                                            <select name="DAST_7" class="form-control" required>
+                                                <option disabled selected value>Select One</option>
+                                                <option value="No">No</option>
+                                                <option value="Yes">Yes</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                    <div class="question-item">
+                                        <label>
+                                            <span class="question">8. Have you engaged in illegal activities in order to obtain drugs?</span>
+                                            <select name="DAST_8" class="form-control" required>
+                                                <option disabled selected value>Select One</option>
+                                                <option value="No">No</option>
+                                                <option value="Yes">Yes</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                    <div class="question-item">
+                                        <label>
+                                            <span class="question">9. Have you ever experienced withdrawal symptoms (felt sick) when you stopped taking drugs?</span>
+                                            <select name="DAST_9" class="form-control" required>
+                                                <option disabled selected value>Select One</option>
+                                                <option value="No">No</option>
+                                                <option value="Yes">Yes</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                    <div class="question-item">
+                                        <label>
+                                            <span class="question">10. Have you had medical problems as a result of your drug use (e.g., memory loss, hepatitis, convulsions, bleeding)?</span>
+                                            <select name="DAST_10" class="form-control" required>
+                                                <option disabled selected value>Select One</option>
+                                                <option value="No">No</option>
+                                                <option value="Yes">Yes</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="step-navigation">
+                                    <button type="button" name="action" value="previous" class="btn btn-secondary">Previous</button>
+                                    <button type="button" name="action" value="next" class="btn btn-primary">Next Step</button>
+                                </div>
+                            </div>
+                                
+
+                                       <!-- Step 5: AUDIT Alcohol Use Screening -->
+                                <div class="assessment-step" id="step-5" data-step="5" style="display: none;">
+                                    <div class="section-title">Step 5: AUDIT Alcohol Use Screening</div>
+                                <div class="assessment-instructions">
+                                    <p><strong>Instructions:</strong> Please answer the following questions based on your alcohol use over the past 12 months.</p>
+                                    <p><em>Select the most appropriate response for each question.</em></p>
+                                </div>
+                                <div class="row">
+                                    <div class="question-item">
+                                        <label>
+                                            <span class="question">1. How often do you have a drink containing alcohol?</span>
+                                            <select name="AUDIT_1" class="form-control" required>
+                                                <option disabled selected value>Select One</option>
+                                                <option value="Never">Never</option>
+                                                <option value="Monthly or less">Monthly or less</option>
+                                                <option value="2 to 4 times a month">2 to 4 times a month</option>
+                                                <option value="2 to 3 times a week">2 to 3 times a week</option>
+                                                <option value="4 or more times a week">4 or more times a week</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                    <div class="question-item">
+                                        <label>
+                                            <span class="question">2. How many drinks containing alcohol do you have on a typical day when you are drinking?</span>
+                                            <select name="AUDIT_2" class="form-control" required>
+                                                <option disabled selected value>Select One</option>
+                                                <option value="1 or 2">1 or 2</option>
+                                                <option value="3 or 4">3 or 4</option>
+                                                <option value="5 or 6">5 or 6</option>
+                                                <option value="7, 8, or 9">7, 8, or 9</option>
+                                                <option value="10 or more">10 or more</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                    <div class="question-item">
+                                        <label>
+                                            <span class="question">3. How often do you have six or more drinks on one occasion?</span>
+                                            <select name="AUDIT_3" class="form-control" required>
+                                                <option disabled selected value>Select One</option>
+                                                <option value="Never">Never</option>
+                                                <option value="Less than monthly">Less than monthly</option>
+                                                <option value="Monthly">Monthly</option>
+                                                <option value="Weekly">Weekly</option>
+                                                <option value="Daily or almost daily">Daily or almost daily</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                    <div class="question-item">
+                                        <label>
+                                            <span class="question">4. How often during the last year have you found that you were not able to stop drinking once you had started?</span>
+                                            <select name="AUDIT_4" class="form-control" required>
+                                                <option disabled selected value>Select One</option>
+                                                <option value="Never">Never</option>
+                                                <option value="Less than monthly">Less than monthly</option>
+                                                <option value="Monthly">Monthly</option>
+                                                <option value="Weekly">Weekly</option>
+                                                <option value="Daily or almost daily">Daily or almost daily</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                    <div class="question-item">
+                                        <label>
+                                            <span class="question">5. How often during the last year have you failed to do what was normally expected from you because of drinking?</span>
+                                            <select name="AUDIT_5" class="form-control" required>
+                                                <option disabled selected value>Select One</option>
+                                                <option value="Never">Never</option>
+                                                <option value="Less than monthly">Less than monthly</option>
+                                                <option value="Monthly">Monthly</option>
+                                                <option value="Weekly">Weekly</option>
+                                                <option value="Daily or almost daily">Daily or almost daily</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                    <div class="question-item">
+                                        <label>
+                                            <span class="question">6. How often during the last year have you needed a first drink in the morning to get yourself going after a heavy drinking session?</span>
+                                            <select name="AUDIT_6" class="form-control" required>
+                                                <option disabled selected value>Select One</option>
+                                                <option value="Never">Never</option>
+                                                <option value="Less than monthly">Less than monthly</option>
+                                                <option value="Monthly">Monthly</option>
+                                                <option value="Weekly">Weekly</option>
+                                                <option value="Daily or almost daily">Daily or almost daily</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                    <div class="question-item">
+                                        <label>
+                                            <span class="question">7. How often during the last year have you had a feeling of guilt or remorse after drinking?</span>
+                                            <select name="AUDIT_7" class="form-control" required>
+                                                <option disabled selected value>Select One</option>
+                                                <option value="Never">Never</option>
+                                                <option value="Less than monthly">Less than monthly</option>
+                                                <option value="Monthly">Monthly</option>
+                                                <option value="Weekly">Weekly</option>
+                                                <option value="Daily or almost daily">Daily or almost daily</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                    <div class="question-item">
+                                        <label>
+                                            <span class="question">8. How often during the last year have you been unable to remember what happened the night before because you had been drinking?</span>
+                                            <select name="AUDIT_8" class="form-control" required>
+                                                <option disabled selected value>Select One</option>
+                                                <option value="Never">Never</option>
+                                                <option value="Less than monthly">Less than monthly</option>
+                                                <option value="Monthly">Monthly</option>
+                                                <option value="Weekly">Weekly</option>
+                                                <option value="Daily or almost daily">Daily or almost daily</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                    <div class="question-item">
+                                        <label>
+                                            <span class="question">9. Have you or someone else been injured as a result of your drinking?</span>
+                                            <select name="AUDIT_9" class="form-control" required>
+                                                <option disabled selected value>Select One</option>
+                                                <option value="No">No</option>
+                                                <option value="Yes, but not in the last year">Yes, but not in the last year</option>
+                                                <option value="Yes, during the last year">Yes, during the last year</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                    <div class="question-item">
+                                        <label>
+                                            <span class="question">10. Has a relative or friend or a doctor or another health worker been concerned about your drinking or suggested you cut down?</span>
+                                            <select name="AUDIT_10" class="form-control" required>
+                                                <option disabled selected value>Select One</option>
+                                                <option value="No">No</option>
+                                                <option value="Yes, but not in the last year">Yes, but not in the last year</option>
+                                                <option value="Yes, during the last year">Yes, during the last year</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                </div>
+                                    <div class="step-navigation">
+                                        <button type="submit" name="action" value="previous" class="btn btn-secondary">Previous</button>
+                                        <button type="submit" name="action" value="next" class="btn btn-primary">Next Step</button>
+                                    </div>
+                                </div>
+                                    
+                                
+
+                                <!-- Step 6: Bipolar Screening -->
+                                <div class="assessment-step" id="step-6" data-step="6" style="display: none;">
+                                    <div class="section-title">Step 6: Bipolar Screening</div>
+                                <div class="assessment-instructions">
+                                    <p><strong>Instructions:</strong> Have there ever been times when you were not your usual self and...</p>
+                                    <p><em>Please answer Yes or No for each question.</em></p>
+                                </div>
+                                <div class="row">
+                                    <div class="question-item">
+                                        <label>
+                                            <span class="question">1. You felt so good or hyper that other people thought you were not your normal self or were so hyper that you got into trouble?</span>
+                                            <select name="BIPOLAR_1" class="form-control" required>
+                                                <option disabled selected value>Select One</option>
+                                                <option value="No">No</option>
+                                                <option value="Yes">Yes</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                    <div class="question-item">
+                                        <label>
+                                            <span class="question">2. You were so irritable that you shouted at people or started fights or arguments?</span>
+                                            <select name="BIPOLAR_2" class="form-control" required>
+                                                <option disabled selected value>Select One</option>
+                                                <option value="No">No</option>
+                                                <option value="Yes">Yes</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                    <div class="question-item">
+                                        <label>
+                                            <span class="question">3. You felt much more self-confident than usual?</span>
+                                            <select name="BIPOLAR_3" class="form-control" required>
+                                                <option disabled selected value>Select One</option>
+                                                <option value="No">No</option>
+                                                <option value="Yes">Yes</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                    <div class="question-item">
+                                        <label>
+                                            <span class="question">4. You got much less sleep than usual and found you didn't really miss it?</span>
+                                            <select name="BIPOLAR_4" class="form-control" required>
+                                                <option disabled selected value>Select One</option>
+                                                <option value="No">No</option>
+                                                <option value="Yes">Yes</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                    <div class="question-item">
+                                        <label>
+                                            <span class="question">5. You were much more talkative or spoke faster than usual?</span>
+                                            <select name="BIPOLAR_5" class="form-control" required>
+                                                <option disabled selected value>Select One</option>
+                                                <option value="No">No</option>
+                                                <option value="Yes">Yes</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                    <div class="question-item">
+                                        <label>
+                                            <span class="question">6. You had racing thoughts?</span>
+                                            <select name="BIPOLAR_6" class="form-control" required>
+                                                <option disabled selected value>Select One</option>
+                                                <option value="No">No</option>
+                                                <option value="Yes">Yes</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                    <div class="question-item">
+                                        <label>
+                                            <span class="question">7. You were so easily distracted that you had trouble concentrating?</span>
+                                            <select name="BIPOLAR_7" class="form-control" required>
+                                                <option disabled selected value>Select One</option>
+                                                <option value="No">No</option>
+                                                <option value="Yes">Yes</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                    <div class="question-item">
+                                        <label>
+                                            <span class="question">8. You were more active or did more things than usual?</span>
+                                            <select name="BIPOLAR_8" class="form-control" required>
+                                                <option disabled selected value>Select One</option>
+                                                <option value="No">No</option>
+                                                <option value="Yes">Yes</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                    <div class="question-item">
+                                        <label>
+                                            <span class="question">9. You were much more social or outgoing than usual?</span>
+                                            <select name="BIPOLAR_9" class="form-control" required>
+                                                <option disabled selected value>Select One</option>
+                                                <option value="No">No</option>
+                                                <option value="Yes">Yes</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                    <div class="question-item">
+                                        <label>
+                                            <span class="question">10. You did things that were unusual for you or that other people might have thought were excessive or risky?</span>
+                                            <select name="BIPOLAR_10" class="form-control" required>
+                                                <option disabled selected value>Select One</option>
+                                                <option value="No">No</option>
+                                                <option value="Yes">Yes</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                    <div class="question-item">
+                                        <label>
+                                            <span class="question">11. Spending money got you or your family into trouble?</span>
+                                            <select name="BIPOLAR_11" class="form-control" required>
+                                                <option disabled selected value>Select One</option>
+                                                <option value="No">No</option>
+                                                <option value="Yes">Yes</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                </div>
+                                    <div class="step-navigation">
+                                        <button type="submit" name="action" value="previous" class="btn btn-secondary">Previous</button>
+                                        <button type="submit" name="action" value="submit" class="btn btn-success">Complete Assessment</button>
+                                    </div>
+                                </div>
+
+                                <!-- Progress indicator -->
+                                <div class="progress-indicator">
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" id="progress-fill"></div>
+                                    </div>
+                                    <div class="step-counter">
+                                        Step <span id="current-step-number">{{ session.get('current_step', 1) }}</span> of <span id="total-step-number">6</span>
+                                    </div>
+                                </div>
+
+                                {% if prediction %}
+                                <div class="result" id="result-message" style="display:none;">
+                                    <strong>Result:</strong> {{ prediction['prediction'] }}<br>
+                                    <strong>Score:</strong> {{ prediction['score'] }}
+                                </div>
+                                {% endif %}
+
+                            </div>
+
+            </div>
+
+                        </form>
+                    </div>
+                </div>
+        
+        </div>
+    </section>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Initialize variables
+    var currentStep = 1;
+    var totalSteps = 6;
+    var assessmentData = {};
+
+    console.log('Initializing client-side step navigation');
+
+    // Show only the current step
+    function showStep(stepNumber) {
+        console.log('Showing step:', stepNumber);
+        
+        const steps = document.querySelectorAll('.assessment-step');
+        steps.forEach((step, index) => {
+            const stepNum = index + 1;
+            if (stepNum === stepNumber) {
+                step.style.display = 'block';
+            } else {
+                step.style.display = 'none';
+            }
+        });
+
+        // Update progress indicator
+        updateProgressIndicator(stepNumber);
+        
+        // Update current step
+        currentStep = stepNumber;
+        
+        // Update hidden form field
+        const currentStepInput = document.getElementById('current-step');
+        if (currentStepInput) {
+            currentStepInput.value = currentStep;
+        }
+    }
+
+    // Update progress indicator
+    function updateProgressIndicator(stepNumber) {
+        const progressFill = document.getElementById('progress-fill');
+        const currentStepNumber = document.getElementById('current-step-number');
+
+        if (progressFill) {
+            const progressPercent = (stepNumber / totalSteps) * 100;
+            progressFill.style.width = progressPercent + '%';
+        }
+
+        if (currentStepNumber) {
+            currentStepNumber.textContent = stepNumber;
+        }
+    }
+
+    // Validate current step - IMPROVED VERSION
+    function validateCurrentStep() {
+        const currentStepDiv = document.querySelector('.assessment-step[style*="block"]');
+        if (!currentStepDiv) return true;
+
+        const requiredFields = currentStepDiv.querySelectorAll('select[required], input[required]');
+        let isValid = true;
+        let invalidFields = [];
+
+        requiredFields.forEach(field => {
+            if (!field.value || field.value === '' || field.value === 'Select One') {
+                isValid = false;
+                invalidFields.push(field);
+                field.style.borderColor = '#dc3545';
+                field.style.backgroundColor = '#fff5f5';
+                field.style.boxShadow = '0 0 5px rgba(220, 53, 69, 0.5)';
+            } else {
+                field.style.borderColor = '#28a745';
+                field.style.backgroundColor = '#f8fff8';
+                field.style.boxShadow = '0 0 5px rgba(40, 167, 69, 0.3)';
+            }
+        });
+
+        if (!isValid) {
+            // Scroll to first invalid field
+            if (invalidFields.length > 0) {
+                invalidFields[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                invalidFields[0].focus();
+            }
+            alert(`Please fill in all required fields before proceeding. (${invalidFields.length} fields missing)`);
+        }
+
+        return isValid;
+    }
+
+    // Save current step data
+    function saveCurrentStepData() {
+        const currentStepDiv = document.querySelector('.assessment-step[style*="block"]');
+        if (!currentStepDiv) return;
+
+        const formFields = currentStepDiv.querySelectorAll('input, select, textarea');
+        formFields.forEach(field => {
+            if (field.name && field.value && field.value !== 'Select One') {
+                assessmentData[field.name] = field.value;
+            }
+        });
+        
+        console.log('Saved step data:', assessmentData);
+    }
+
+    // Load saved data for current step
+    function loadSavedData() {
+        Object.keys(assessmentData).forEach(key => {
+            const field = document.querySelector(`[name="${key}"]`);
+            if (field && assessmentData[key] && assessmentData[key] !== 'Select One') {
+                field.value = assessmentData[key];
+            }
+        });
+    }
+
+    // Handle navigation button clicks
+    function handleNavigation(e) {
+        e.preventDefault(); // Prevent form submission
+        
+        const action = e.target.getAttribute('value') || e.target.getAttribute('data-action');
+        console.log('Navigation action:', action);
+
+        // Save current step data first
+        saveCurrentStepData();
+
+        if (action === 'next') {
+            // Validate before going to next step
+            if (!validateCurrentStep()) {
+                return false;
+            }
+            
+            if (currentStep < totalSteps) {
+                showStep(currentStep + 1);
+            }
+        } else if (action === 'previous') {
+            if (currentStep > 1) {
+                showStep(currentStep - 1);
+            }
+        } else if (action === 'submit') {
+            // Validate before submitting
+            if (!validateCurrentStep()) {
+                return false;
+            }
+            
+            // Change form action to submission endpoint and submit
+            const form = document.getElementById('survey-form');
+            if (form) {
+                // Add all saved data to form before submission
+                Object.keys(assessmentData).forEach(key => {
+                    let existingField = form.querySelector(`[name="${key}"]`);
+                    if (!existingField) {
+                        const hiddenField = document.createElement('input');
+                        hiddenField.type = 'hidden';
+                        hiddenField.name = key;
+                        hiddenField.value = assessmentData[key];
+                        form.appendChild(hiddenField);
+                    }
+                });
+                
+                form.action = '/assessment/submit';
+                form.submit();
+            }
+        }
+
+        return false; // Prevent any default action
+    }
+
+    // Add event listeners to all navigation buttons
+    const navButtons = document.querySelectorAll('.step-navigation button');
+    navButtons.forEach(button => {
+        button.addEventListener('click', handleNavigation);
+    });
+
+    // Prevent default form submission
+    const form = document.getElementById('survey-form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            // Only allow submission if it's the final submit
+            if (!e.target.closest('button[value="submit"]')) {
+                e.preventDefault();
+                return false;
+            }
+        });
+    }
+
+    // Initialize the first step
+    showStep(1);
+    loadSavedData();
+
+    console.log('Client-side navigation initialized');
+});
+</script>
+</body>
+</html>

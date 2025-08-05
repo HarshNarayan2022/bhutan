@@ -1,0 +1,84 @@
+{
+  "timestamp": "2025-06-26T14:36:30.957480",
+  "name": "Harsh Narayan",
+  "age": 25,
+  "sex": "Male",
+  "location": "Urban",
+  "emotion": "anger",
+  "prediction": "Mild",
+  "score": 3.1785573959350586,
+  "averages": {
+    "Self_Distraction": 2.0,
+    "Denial": 2.5,
+    "Venting": 3.0,
+    "Self_Blame": 3.0,
+    "Behavioural_Disengagement": 3.5,
+    "Acceptance": 3.0,
+    "Active_Coping": 4.0,
+    "Shyness": 2.888888888888889,
+    "Loneliness": 3.25,
+    "Self_Esteem": 2.6,
+    "Life_Satisfaction": 2.4
+  },
+  "raw_responses": {
+    "self_distraction": [
+      2.0,
+      2.0
+    ],
+    "denial": [
+      2.0,
+      3.0
+    ],
+    "venting": [
+      3.0,
+      3.0
+    ],
+    "self_blame": [
+      2.0,
+      4.0
+    ],
+    "behavioural_disengagement": [
+      3.0,
+      4.0
+    ],
+    "acceptance": [
+      4.0,
+      2.0
+    ],
+    "active_coping": [
+      5.0,
+      3.0
+    ],
+    "shyness": [
+      1.0,
+      3.0,
+      2.0,
+      3.0,
+      2.0,
+      5.0,
+      4.0,
+      3.0,
+      3.0
+    ],
+    "loneliness": [
+      4.0,
+      2.0,
+      3.0,
+      4.0
+    ],
+    "self_esteem": [
+      2.0,
+      2.0,
+      4.0,
+      3.0,
+      2.0
+    ],
+    "life_satisfaction": [
+      2.0,
+      2.0,
+      3.0,
+      3.0,
+      2.0
+    ]
+  }
+}

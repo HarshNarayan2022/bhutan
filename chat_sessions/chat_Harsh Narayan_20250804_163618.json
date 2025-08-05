@@ -1,0 +1,27 @@
+{
+  "session_id": "20250804_163618",
+  "user_name": "Harsh Narayan",
+  "messages": [
+    {
+      "content": "I am failing sad, what should I do?",
+      "role": "user",
+      "timestamp": "2025-08-04T16:36:18.921585",
+      "topics": [
+        "depression"
+      ]
+    },
+    {
+      "agent": "RAG_AGENT",
+      "content": "I understand you're feeling sad about failing, and that's a really tough feeling to experience. It's completely valid to feel down when things don't go as planned. I'm here to offer support.\n\nRemembering the opposite of your negative feelings can help; if things feel unpleasant, try to focus on peace and relaxation, letting go of the need to do anything. Research shows that being mindful of when you get carried away by negative thoughts and stopping yourself can also be beneficial. Living each day with the intention of bringing joy and kindness can also help shift your perspective.\n\nI recommend considering practicing these techniques when you feel overwhelmed. Since I don't know your full situation, I suggest reaching out to a mental health professional for personalized support and guidance. They can help you explore these feelings further and develop coping strategies.\n",
+      "role": "assistant",
+      "timestamp": "2025-08-04T16:36:21.540544",
+      "topics": [
+        "depression",
+        "coping"
+      ]
+    }
+  ],
+  "metadata": {
+    "topics": []
+  }
+}

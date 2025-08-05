@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Initial Assessment - Mental Health Assistant</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='stylehome.css') }}">
+    <style>
+        .survey-intro {
+            text-align: center;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 40px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .survey-intro h1 {
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+        
+        .survey-intro p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        
+        .benefits {
+            text-align: left;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .benefits li {
+            margin: 10px 0;
+            color: #333;
+        }
+        
+        .btn-start-survey {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .btn-start-survey:hover {
+            transform: translateY(-2px);
+        }
+        
+        .skip-option {
+            margin-top: 20px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="survey-intro">
+        <h1>Welcome, {{ session.user_data.name }}!</h1>
+        <p>Before we begin, we'd like to understand your current mental health status better. 
+           This initial assessment will help us provide personalized support.</p>
+        
+        <div class="benefits">
+            <h3>Why take this assessment?</h3>
+            <ul>
+                <li>🎯 Get personalized mental health insights</li>
+                <li>📊 Track your progress over time</li>
+                <li>💡 Receive tailored recommendations</li>
+                <li>🔒 Your data is completely confidential</li>
+            </ul>
+        </div>
+        
+        <p><strong>Time required:</strong> 5-7 minutes</p>
+        
+        <form action="{{ url_for('home') }}" method="get">
+            <button type="submit" class="btn-start-survey">Start Assessment</button>
+        </form>
+        
+        <!-- Optional: Allow skipping for now -->
+        <!-- <div class="skip-option">
+            <a href="{{ url_for('chatbot') }}">Skip for now</a>
+        </div> -->
+    </div>
+</body>
+</html>
