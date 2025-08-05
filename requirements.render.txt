@@ -14,16 +14,13 @@ numpy<2.0.0
 transformers==4.35.0
 sentence-transformers==2.2.2
 
-# LangChain Core (minimal compatible set)
+# LangChain Core (minimal for basic AI functionality)
 langchain==0.1.20
 langchain-google-genai==1.0.1
 langchain-core==0.1.52
 google-generativeai==0.4.1
 
-# CrewAI Dependencies (compatible with langchain 0.1.x)
-crewai==0.28.8
-
-# Database Dependencies
+# Database Dependencies (compatible versions)
 SQLAlchemy==2.0.23
 psycopg2-binary==2.9.7
 
@@ -55,5 +52,5 @@ sentry-sdk[flask]==1.38.0
 # Image Processing
 Pillow==10.1.0
 
-# Vector Database
+# Vector Database (required for RAG functionality)
 qdrant-client==1.6.9
