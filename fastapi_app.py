@@ -4,8 +4,6 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, EmailStr, Field
 from uuid import UUID, uuid4
 import numpy as np
-import tensorflow as tf
-import keras
 import os
 import yaml
 from datetime import datetime, timedelta
