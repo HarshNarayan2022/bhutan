@@ -450,9 +450,10 @@ def health():
     """Health check endpoint for monitoring and load balancers"""
     try:
         # Basic health check - ensure app is responsive
+        from sqlalchemy import text
         db_session = DBSession()
         # Simple database connectivity test
-        db_session.execute("SELECT 1")
+        db_session.execute(text("SELECT 1"))
         db_session.close()
         
         return jsonify({

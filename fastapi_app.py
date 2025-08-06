@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Form, HTTPException, BackgroundTasks, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, Field
 from uuid import UUID, uuid4
 import numpy as np
 import os
@@ -143,6 +143,25 @@ async def health_check():
         "version": "1.0.0"
     }
 
+@app.get("/fastapi-health")
+async def fastapi_health():
+    """FastAPI health check endpoint"""
+    try:
+        return {
+            "status": "healthy",
+            "service": "Mental Health Chatbot FastAPI Backend",
+            "timestamp": datetime.utcnow().isoformat(),
+            "rag_available": hasattr(app.state, 'rag') and app.state.rag is not None,
+            "version": "1.0.0"
+        }
+    except Exception as e:
+        return {
+            "status": "unhealthy", 
+            "error": str(e),
+            "service": "Mental Health Chatbot FastAPI Backend",
+            "timestamp": datetime.utcnow().isoformat()
+        }
+
 @app.get("/")
 async def root():
     """Root endpoint"""
@@ -173,11 +192,11 @@ class UserProfileCreate(BaseModel):
     marital_status: Optional[str]
     previous_mental_diagnosis: Optional[str] = "NA"
     ethnicity: Optional[str]
-    email: EmailStr
+    email: str  # Changed from EmailStr to str to avoid email-validator dependency
     password: str
 
 class LoginRequest(BaseModel):
-    email: EmailStr
+    email: str  # Changed from EmailStr to str
     password: str
 
 class UserResponse(BaseModel):
@@ -190,7 +209,7 @@ class UserResponse(BaseModel):
     marital_status: Optional[str]
     previous_mental_diagnosis: Optional[str]
     ethnicity: Optional[str]
-    email: EmailStr
+    email: str  # Changed from EmailStr to str
 
     class Config:
         from_attributes = True

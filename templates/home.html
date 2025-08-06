@@ -4,15 +4,15 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="GreenLife Mental Health Assistant - Your personalized mental wellness companion">
-    <meta name="keywords" content="mental health, chatbot, wellness, self-assessment, coping strategies, shyness, loneliness, self esteem, life satisfaction">
+    <meta name="description" content="Advanced Multi-Agent AI Mental Health Assistant with Voice Interaction, Crisis Detection, and Evidence-Based Assessments">
+    <meta name="keywords" content="mental health, AI chatbot, multi-agent system, voice interaction, crisis detection, PHQ-9, GAD-7, DAST-10, AUDIT, mental health assessment, CrewAI, RAG, Whisper AI, text-to-speech">
     <meta name="robots" content="INDEX, FOLLOW">
     <link rel="stylesheet" href="{{ url_for('static', filename='stylehome.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='mediahome.css') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap" rel="stylesheet">
-    <title>Mental Health Chatbot - GreenLife</title>
+    <title>Bhutanese Mental Health Assistant</title>
     <style>
         /* Authentication modal styles */
         .auth-overlay {
@@ -355,9 +355,9 @@
 
    <!-- Landing Page Content -->
 {% if session.user_id %}
-<section class="firstsection auth-prompt">
-    <div class="box">
-        <div class="container" style="text-align: center; padding: 50px;">
+<section class="firstsection auth-prompt" style="height: 100vh;">
+    <div class="box" >
+        <div class="container" style="text-align: center; padding: 50px; ">
             <h1>Welcome back, {{ session.user_data.name }}!</h1>
             <p style="font-size: 20px; color: #667eea; margin: 20px 0;">Ready to continue your mental wellness journey?</p>
             
@@ -372,53 +372,68 @@
 <section class="firstsection auth-prompt">
     <div class="box">
         <div class="container" style="text-align: center; padding: 50px;">
-            <h1>Welcome to GreenLife Mental Health Assistant</h1>
-            <p style="font-size: 20px; color: #667eea; margin: 20px 0;">Your Personalized Mental Wellness Companion</p>
+            <h1>Welcome to Bhutanese Mental Health AI Assistant</h1>
+            <p style="font-size: 20px; color: #667eea; margin: 20px 0;">Advanced Multi-Agent AI System for Comprehensive Mental Wellness Support</p>
             
             <div style="max-width: 800px; margin: 0 auto; text-align: left;">
                 <div style="background: #f8f9fa; padding: 30px; border-radius: 15px; margin: 30px 0;">
-                    <h2 style="color: #333; margin-bottom: 20px;">What We Offer:</h2>
+                    <h2 style="color: #333; margin-bottom: 20px;">Bhutanese Mental Health Support Features:</h2>
                     
                     <div style="margin-bottom: 20px;">
-                        <h3 style="color: #667eea;">🧠 Comprehensive Mental Health Assessment</h3>
-                        <p>Take a scientifically-backed questionnaire covering key areas of mental wellness including coping strategies, shyness levels, loneliness, self-esteem, and life satisfaction.</p>
+                        <h3 style="color: #667eea;">� Multi-Agent AI System</h3>
+                        <p>Experience our advanced AI chatbot powered by specialized agents including Crisis Detection, Mental Health Assessment, Knowledge Retrieval, and Personalized Recommendation systems using cutting-edge CrewAI technology.</p>
                     </div>
                     
                     <div style="margin-bottom: 20px;">
-                        <h3 style="color: #667eea;">💬 AI-Powered Chatbot Support</h3>
-                        <p>Get 24/7 access to our intelligent chatbot that provides personalized mental health guidance, coping strategies, and emotional support based on your assessment results.</p>
+                        <h3 style="color: #667eea;">🎯 Scientifically-Backed Assessments</h3>
+                        <p>Take standardized mental health assessments including PHQ-9 (Depression), GAD-7 (Anxiety), DAST-10 (Substance Use), AUDIT (Alcohol Use), and Bipolar Disorder screening with immediate scoring and interpretation.</p>
                     </div>
                     
                     <div style="margin-bottom: 20px;">
-                        <h3 style="color: #667eea;">📊 Personalized Insights</h3>
-                        <p>Receive detailed analysis of your mental health status with actionable recommendations tailored to your specific needs and concerns.</p>
+                        <h3 style="color: #667eea;">🎤 Voice & Speech Integration</h3>
+                        <p>Interact naturally with voice recording capabilities, real-time speech-to-text transcription using Whisper AI, and text-to-speech responses for a more accessible and conversational experience.</p>
                     </div>
                     
                     <div style="margin-bottom: 20px;">
-                        <h3 style="color: #667eea;">🔐 Private & Secure</h3>
-                        <p>Your privacy is our priority. All your data is encrypted and stored securely. You can also explore as a guest without creating an account.</p>
+                        <h3 style="color: #667eea;">� Knowledge-Enhanced Responses</h3>
+                        <p>Get evidence-based guidance through our RAG (Retrieval-Augmented Generation) system that draws from comprehensive mental health knowledge bases and culturally sensitive resources for Bhutan.</p>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <h3 style="color: #667eea;">🆘 Crisis Detection & Support</h3>
+                        <p>Advanced AI monitors conversations for crisis indicators, providing immediate emergency resources and specialized support when needed, with direct access to Bhutanese mental health helplines.</p>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <h3 style="color: #667eea;">🔐 Privacy & Security First</h3>
+                        <p>Your data is protected with encryption, secure authentication, and the option to use our services anonymously as a guest. All conversations and assessments are stored securely.</p>
                     </div>
                 </div>
                 
                 <div style="background: #e8f4fd; padding: 25px; border-radius: 15px; margin-bottom: 30px;">
-                    <h3 style="color: #0c5460; margin-bottom: 15px;">How It Works:</h3>
+                    <h3 style="color: #0c5460; margin-bottom: 15px;">How Our Advanced System Works:</h3>
                     <ol style="margin-left: 20px; line-height: 1.8;">
-                        <li><strong>Sign Up or Continue as Guest</strong> - Create a free account to save your progress or explore anonymously</li>
-                        <li><strong>Complete the Assessment</strong> - Answer questions about your mental health across multiple dimensions</li>
-                        <li><strong>Get Your Results</strong> - Receive immediate feedback on your mental health status</li>
-                        <li><strong>Chat with Our AI Assistant</strong> - Get personalized support and coping strategies</li>
-                        <li><strong>Track Your Progress</strong> - Return anytime to reassess and monitor your mental wellness journey</li>
+                        <li><strong>Smart Authentication</strong> - Create a secure account or explore anonymously with guest access</li>
+                        <li><strong>AI-Powered Assessment</strong> - Complete standardized mental health screenings (PHQ-9, GAD-7, etc.) with instant scoring</li>
+                        <li><strong>Multi-Agent Chat System</strong> - Interact with specialized AI agents for crisis detection, condition classification, and personalized recommendations</li>
+                        <li><strong>Voice & Text Interaction</strong> - Chat via text or voice with real-time transcription and text-to-speech responses</li>
+                        <li><strong>Knowledge-Enhanced Support</strong> - Receive evidence-based guidance from our comprehensive mental health knowledge base</li>
+                        <li><strong>Progress Tracking</strong> - Monitor your mental wellness journey with saved assessments and chat history</li>
+                        <li><strong>Emergency Support</strong> - Automatic crisis detection with immediate access to local Bhutanese mental health resources</li>
                     </ol>
                 </div>
             </div>
             
             <div style="margin-top: 30px; display: flex; justify-content: center; flex-direction: column; align-items: center;">
-                <button class="btn btn-primary" onclick="showAuthModal()" style="margin: 10px; font-size: 18px; padding: 15px 30px;">Get Started Now</button>
-                <a href="{{ url_for('guest_access') }}" class="btn btn-secondary" style="margin: 10px; font-size: 18px; padding: 15px 30px;">Try as Guest</a>
+                <button class="btn btn-primary" onclick="showAuthModal()" style="margin: 10px; font-size: 18px; padding: 15px 30px;">🚀 Start Your Journey</button>
+                <a href="{{ url_for('guest_access') }}" class="btn btn-secondary" style="margin: 10px; font-size: 18px; padding: 15px 30px;">👤 Try as Guest</a>
+                <p style="margin-top: 15px; font-size: 14px; color: #888;">
+                    ✨ Featuring: Multi-Agent AI • Voice Interaction • Crisis Detection • Evidence-Based Assessments
+                </p>
             </div>
             
             <p style="margin-top: 20px; font-style: italic; color: #666;">
-                Remember: This tool is for self-assessment and support only. If you're experiencing severe mental health issues, please consult a healthcare professional.
+                <strong>Powered by Advanced AI:</strong> Our system uses CrewAI multi-agent technology, Whisper speech recognition, RAG knowledge retrieval, and evidence-based assessment tools. This tool is for support and assessment only - for emergencies or serious concerns, please consult healthcare professionals or contact emergency services.
             </p>
         </div>
     </div>

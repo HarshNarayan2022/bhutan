@@ -55,12 +55,56 @@ class RenderServiceManager:
                         
             threading.Thread(target=log_output, daemon=True).start()
             
+            # Monitor process health
+            threading.Thread(target=self.monitor_process, args=(process, name, command, env), daemon=True).start()
+            
             print(f"✅ {name} started with PID {process.pid}")
             return process
             
         except Exception as e:
             print(f"❌ Failed to start {name}: {e}")
             return None
+    
+    def monitor_process(self, process, name, command, env=None):
+        """Monitor process and restart if it crashes"""
+        while not self.shutdown_event.is_set():
+            try:
+                # Check if process is still running
+                if process.poll() is not None:
+                    print(f"⚠️ {name} crashed (exit code: {process.returncode}), restarting...")
+                    time.sleep(2)  # Brief delay before restart
+                    
+                    # Restart the process
+                    new_process = subprocess.Popen(
+                        command,
+                        shell=True,
+                        env=env or os.environ.copy(),
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.STDOUT,
+                        universal_newlines=True,
+                        bufsize=1
+                    )
+                    
+                    # Update process in list
+                    for i, (proc, proc_name) in enumerate(self.processes):
+                        if proc == process:
+                            self.processes[i] = (new_process, proc_name)
+                            break
+                    
+                    process = new_process
+                    print(f"🔄 {name} restarted with PID {process.pid}")
+                    
+                    # Start logging for new process
+                    def log_output():
+                        for line in iter(process.stdout.readline, ''):
+                            if line.strip():
+                                print(f"[{name}] {line.strip()}")
+                    threading.Thread(target=log_output, daemon=True).start()
+                
+                time.sleep(5)  # Check every 5 seconds
+            except Exception as e:
+                print(f"❌ Error monitoring {name}: {e}")
+                time.sleep(5)
     
     def stop_all_services(self):
         """Stop all background services"""

@@ -60,7 +60,9 @@ ALLOWED_ORIGINS=https://your-app-name.onrender.com
 
 ### Health Checks
 - Flask health endpoint: `https://your-app.onrender.com/health`
+- FastAPI health endpoint: `https://your-app.onrender.com/fastapi-health` (internal)
 - Automatic health monitoring included
+- Process restart mechanism for crashed services
 
 ### Service Architecture
 - **Single Container**: Flask + FastAPI in one container
@@ -99,6 +101,17 @@ Monitor in Render dashboard:
 - API key validation
 - Service startup issues
 - Database connection problems
+- FastAPI backend crashes
+- Email validator dependency issues
+```
+
+#### FastAPI Backend Issues
+```bash
+# Common FastAPI problems:
+- Missing email-validator: Fixed in requirements
+- Process crashes: Auto-restart mechanism enabled
+- Memory issues: Optimized memory settings applied
+- SQLAlchemy text() errors: Fixed in health checks
 ```
 
 #### Health Check Failures
