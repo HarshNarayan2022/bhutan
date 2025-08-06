@@ -1,8 +1,18 @@
-# Docker Deployment Status for Render.com
+# Mental Health Chatbot - Deployment Status
 
-## Current Status: ✅ READY FOR RENDER DEPLOYMENT
+## 🎉 SUCCESSFULLY DEPLOYED
+**Live URL**: https://bhutan-mental-health-chatbot.onrender.com
+**Deployment Method**: Docker-only on Render.com
+**Status**: ✅ ACTIVE & OPTIMIZED
 
-The Mental Health Chatbot application has been successfully optimized for Docker-only deployment on Render.com.
+## 🔧 Recent Critical Fixes (August 6, 2025)
+
+### Memory & Performance Issues RESOLVED ✅
+- **Fixed worker timeouts** causing app crashes during AI processing
+- **Optimized memory usage** by implementing lazy loading for AI models  
+- **Reduced startup memory** from ~1GB to ~400MB
+- **Extended timeouts** to 300s for AI operations
+- **Single worker configuration** for memory-constrained environment
 
 ## 🏗️ Deployment Architecture
 

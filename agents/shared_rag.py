@@ -31,9 +31,9 @@ class SharedRAG:
             # Initialize config
             self.config = Config()
             
-            # Initialize models
-            logger.info("📊 Loading embedding model...")
-            self.embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
+            # Initialize models (lazy loading for memory optimization)
+            logger.info("📊 Embedding model will be loaded when needed...")
+            self.embedding_model = None
             
             logger.info("🤖 Loading LLM...")
             self.llm = ChatGoogleGenerativeAI(
@@ -44,7 +44,7 @@ class SharedRAG:
             
             # Initialize RAG
             logger.info("📚 Initializing MedicalRAG...")
-            self.rag = MedicalRAG(self.config, self.llm, self.embedding_model)
+            self.rag = MedicalRAG(self.config, self.llm, self.get_embedding_model)
             
             # Ensure knowledge is ingested
             self._ensure_knowledge_ingested()
@@ -52,7 +52,22 @@ class SharedRAG:
             SharedRAG._initialized = True
             SharedRAG._initialization_time = current_time
             logger.info(f"✅ Shared RAG instance ready in {time.time() - current_time:.2f}s")
-
+        except Exception as e:
+            logger.error(f"❌ Error initializing SharedRAG: {str(e)}")
+            raise e
+    
+    def get_embedding_model(self):
+        """Lazy load the embedding model only when needed"""
+        if self.embedding_model is None:
+            try:
+                logger.info("📊 Loading embedding model...")
+                self.embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
+                logger.info("✅ Embedding model loaded successfully")
+            except Exception as e:
+                logger.error(f"⚠️ Failed to load embedding model: {e}")
+                return None
+        return self.embedding_model
+    
     def _ensure_knowledge_ingested(self):
         """Ensure knowledge base is populated."""
         try:

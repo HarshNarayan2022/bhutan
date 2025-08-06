@@ -78,6 +78,32 @@ class RenderServiceManager:
         
         self.processes.clear()
     
+    def setup_environment(self):
+        """Setup environment variables for memory optimization"""
+        # Memory optimization for AI models
+        os.environ['PYTORCH_MPS_HIGH_WATERMARK_RATIO'] = '0.0'  # Disable MPS
+        os.environ['TRANSFORMERS_CACHE'] = '/tmp/transformers_cache'
+        os.environ['HF_HOME'] = '/tmp/huggingface_cache'
+        os.environ['WHISPER_CACHE'] = '/tmp/whisper_cache'
+        
+        # Disable unnecessary features to save memory
+        os.environ['TOKENIZERS_PARALLELISM'] = 'false'
+        os.environ['OMP_NUM_THREADS'] = '1'
+        os.environ['MKL_NUM_THREADS'] = '1'
+        
+        # Python memory optimization
+        os.environ['PYTHONUNBUFFERED'] = '1'
+        os.environ['PYTHONDONTWRITEBYTECODE'] = '1'
+        
+        # Memory mode optimization
+        memory_mode = os.environ.get('MEMORY_MODE', 'normal')
+        if memory_mode == 'lite':
+            os.environ['SKIP_AI_MODELS'] = '1'
+            os.environ['DISABLE_WHISPER'] = '1'
+            print("🔧 Running in LITE memory mode - AI features limited")
+        
+        print("🔧 Environment optimized for memory constraints")
+        
     def setup_directories(self):
         """Create necessary directories"""
         directories = ["data", "logs", "uploads", "chat_sessions", "survey_data"]
@@ -122,15 +148,18 @@ class RenderServiceManager:
         flask_env['HOST'] = '0.0.0.0'
         flask_env['BACKEND_URL'] = f'http://localhost:{PORT + 1000}'
         
-        # Run Flask with gunicorn for production
+        # Run Flask with gunicorn for production (Render-optimized)
         cmd = [
             'python', '-m', 'gunicorn',
             'main:app',
             '--bind', f'0.0.0.0:{PORT}',
-            '--workers', '2',
-            '--timeout', '120',
-            '--keep-alive', '5',
-            '--max-requests', '1000',
+            '--workers', '1',  # Single worker for memory constraints
+            '--timeout', '300',  # 5 minutes for AI processing
+            '--keep-alive', '2',
+            '--max-requests', '500',  # Lower to prevent memory leaks
+            '--max-requests-jitter', '50',
+            '--worker-class', 'sync',
+            '--worker-connections', '1000',
             '--preload'
         ]
         
@@ -154,6 +183,9 @@ class RenderServiceManager:
         # Register signal handlers
         signal.signal(signal.SIGINT, self.signal_handler)
         signal.signal(signal.SIGTERM, self.signal_handler)
+        
+        # Setup environment for memory optimization
+        self.setup_environment()
         
         # Setup directories
         self.setup_directories()

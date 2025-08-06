@@ -4,7 +4,8 @@ FROM python:3.11-slim
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PORT=10000 \
-    DEBIAN_FRONTEND=noninteractive
+    DEBIAN_FRONTEND=noninteractive \
+    MEMORY_MODE=normal
 
 # Install system dependencies required for the app
 RUN apt-get update && apt-get install -y \

@@ -8,6 +8,7 @@ import json
 from pathlib import Path
 import re
 import uuid
+import gc  # For garbage collection
 # Add these imports at the top
 from functools import wraps
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -83,13 +84,14 @@ def extract_topics(text):
     return topics
 
 
-# Load Whisper model once at startup
+# Load Whisper model once at startup with memory optimization
 whisper_model = None
 try:
     import openai_whisper as whisper  # Try openai-whisper first
     if hasattr(whisper, 'load_model'):
-        whisper_model = whisper.load_model("tiny")  # Use tiny for speed
-        print("✅ OpenAI Whisper model loaded successfully (tiny)")
+        # Use tiny model with memory optimization for Render
+        whisper_model = whisper.load_model("tiny", device="cpu", download_root="/tmp")
+        print("✅ OpenAI Whisper model loaded successfully (tiny, CPU-optimized)")
     else:
         print("⚠️ OpenAI Whisper load_model not available")
         whisper_model = None
@@ -97,8 +99,8 @@ except ImportError:
     try:
         import whisper  # Fallback to regular whisper
         if hasattr(whisper, 'load_model'):
-            whisper_model = whisper.load_model("tiny")
-            print("✅ Whisper model loaded successfully (tiny)")
+            whisper_model = whisper.load_model("tiny", device="cpu", download_root="/tmp")
+            print("✅ Whisper model loaded successfully (tiny, CPU-optimized)")
         else:
             print("⚠️ Whisper load_model not available, using fallback")
             whisper_model = None
@@ -138,7 +140,7 @@ def transcribe():
                 if whisper_model:
                     print("Starting fast transcription...")
                     
-                    # Use fastest Whisper settings
+                    # Use fastest Whisper settings with memory optimization
                     result = whisper_model.transcribe(
                         temp_file.name,
                         language='en',
@@ -146,7 +148,10 @@ def transcribe():
                         temperature=0.0,
                         no_speech_threshold=0.3,  # More lenient
                         logprob_threshold=-1.0,   # More lenient
-                        compression_ratio_threshold=2.4  # Faster processing
+                        compression_ratio_threshold=2.4,  # Faster processing
+                        fp16=False,  # Use FP32 to avoid CPU warnings
+                        verbose=False,  # Reduce memory usage
+                        word_timestamps=False  # Reduce memory usage
                     )
                     
                     transcript = result['text'].strip()
@@ -154,6 +159,10 @@ def transcribe():
                     
                     # Clean up temp file
                     os.unlink(temp_file.name)
+                    
+                    # Force garbage collection to free memory
+                    del result
+                    gc.collect()
                     
                     if not transcript or len(transcript) < 2:
                         return jsonify({

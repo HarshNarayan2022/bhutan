@@ -29,8 +29,9 @@ class RAGConfig:
             rag_config = config_dict['rag']
             self.embedding_dim = rag_config.get('embedding_dim', 384)
             
-            # Use SentenceTransformer for consistency
-            self.embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
+            # Lazy load SentenceTransformer for memory optimization
+            self.embedding_model = None
+            self.embedding_model_name = "all-MiniLM-L6-v2"
             
             self.collection_name = rag_config.get('collection_name', 'mental_health_docs')
             self.chunk_size = rag_config.get('chunk_size', 256)
@@ -50,7 +51,8 @@ class RAGConfig:
         else:
             # Default values if no YAML config
             self.embedding_dim = 384
-            self.embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
+            self.embedding_model = None
+            self.embedding_model_name = "all-MiniLM-L6-v2"
             self.collection_name = 'mental_health_docs'
             self.chunk_size = 256
             self.chunk_overlap = 32
@@ -66,6 +68,18 @@ class RAGConfig:
             self.knowledge_dir = 'knowledge'
             
         self.context_limit = 4
+    
+    def get_embedding_model(self):
+        """Lazy load the embedding model only when needed"""
+        if self.embedding_model is None:
+            try:
+                from sentence_transformers import SentenceTransformer
+                self.embedding_model = SentenceTransformer(self.embedding_model_name)
+                print(f"✅ Embedding model loaded: {self.embedding_model_name}")
+            except Exception as e:
+                print(f"⚠️ Failed to load embedding model: {e}")
+                return None
+        return self.embedding_model
 
 
 @dataclass
