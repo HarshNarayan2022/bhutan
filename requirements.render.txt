@@ -32,8 +32,9 @@ PyYAML==6.0.1
 # Text-to-Speech (lightweight)
 edge-tts==6.1.9
 
-# PDF Generation
+# PDF Generation and Charts
 reportlab==4.0.4
+matplotlib==3.7.2
 
 # Web Requests
 requests==2.31.0
@@ -52,6 +53,9 @@ sentry-sdk[flask]==1.38.0
 
 # Image Processing
 Pillow==10.1.0
+
+# Data Visualization
+matplotlib==3.7.2
 
 # Vector Database (required for RAG functionality)
 qdrant-client==1.6.9
