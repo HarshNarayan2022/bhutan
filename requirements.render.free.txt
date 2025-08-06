@@ -1,0 +1,29 @@
+# Ultra-minimal requirements for Render FREE TIER (512MB RAM limit)
+# This removes ALL AI dependencies and provides basic web functionality only
+
+# Core Web Framework (minimalist versions)
+Flask==2.3.3
+Werkzeug==2.3.7
+gunicorn==21.2.0
+
+# Database (essential only)
+SQLAlchemy==2.0.23
+
+# Environment
+python-dotenv==1.0.0
+
+# Basic web requests
+requests==2.31.0
+
+# Security (minimal)
+bcrypt==4.1.2
+
+# File handling (basic)
+Pillow==10.1.0
+
+# NO AI/ML DEPENDENCIES AT ALL
+# NO transformers, torch, sentence-transformers, whisper, crewai, etc.
+# This should keep total memory usage under 200MB at startup
+
+# AI features will show "unavailable" messages to users
+# For full AI features, upgrade to a paid Render plan and use requirements.render.txt

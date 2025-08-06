@@ -1,29 +1,29 @@
 FROM python:3.11-slim
 
-# Set environment variables for Render deployment
+# Set environment variables for Render FREE TIER deployment
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PORT=10000 \
     DEBIAN_FRONTEND=noninteractive \
-    MEMORY_MODE=normal
+    MEMORY_MODE=free_tier \
+    SKIP_AI_MODELS=1 \
+    DISABLE_WHISPER=1 \
+    DISABLE_CREWAI=1 \
+    MINIMAL_DEPLOYMENT=1
 
-# Install system dependencies required for the app
+# Install minimal system dependencies
 RUN apt-get update && apt-get install -y \
-    gcc \
-    g++ \
     curl \
-    ffmpeg \
-    build-essential \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
 
 # Set work directory
 WORKDIR /app
 
-# Copy requirements first to leverage Docker cache
-COPY requirements.render.txt ./requirements.txt
+# Copy FREE TIER requirements
+COPY requirements.render.free.txt ./requirements.txt
 
-# Install Python dependencies
+# Install minimal Python dependencies
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
@@ -40,5 +40,5 @@ EXPOSE $PORT
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
     CMD curl -f http://localhost:$PORT/health || exit 1
 
-# Start command optimized for Render
+# Start command optimized for Render FREE TIER
 CMD ["python", "render_start.py"]

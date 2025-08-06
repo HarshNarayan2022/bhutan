@@ -1,56 +1,49 @@
 # Mental Health Chatbot Application
 
-A comprehensive multi-agent mental health support application that combines AI-powered conversational assistance with assessment tools, sentiment analysis, and user management features.
+A comprehensive multi-agent mental health support application that combines AI-powered conversational assistance with assessment tools, sentiment analysis, and user management features. **Now optimized for Hugging Face Spaces deployment.**
 
 ## 🌟 Features
 
 ### Core Functionality
 - **AI-Powered Chatbot**: Multi-agent system using CrewAI for intelligent mental health conversations
 - **RAG (Retrieval-Augmented Generation)**: Knowledge base integration for evidence-based responses
-- **Real-time Chat Interface**: Modern web-based chat UI with typing indicators and message history
+- **Real-time Chat Interface**: Modern Gradio-based chat UI with typing indicators and message history
 - **Voice Integration**: Text-to-Speech (TTS) and Speech-to-Text (STT) capabilities
 - **Sentiment Analysis**: Real-time emotion detection and sentiment tracking
 - **Mental Health Assessments**: Standardized questionnaires (PHQ-9, GAD-7, DAST-10, AUDIT, Bipolar)
 
 ### User Management
-- **User Registration & Authentication**: Secure account creation and login
-- **User Dashboard**: Personalized dashboard with assessment history and insights
-- **Guest Access**: Anonymous chat sessions for privacy-conscious users
-- **Account Management**: Profile management and secure account deletion
+- **Session Management**: Secure guest sessions with chat history
+- **User Dashboard**: Assessment history and insights tracking
+- **Anonymous Access**: Privacy-focused chat sessions
+- **Assessment Storage**: Persistent assessment results and reports
 
 ### Advanced Features
 - **Crisis Detection**: Automatic identification of mental health emergencies
 - **Condition Classification**: AI-powered categorization of mental health concerns
-- **Session Management**: Persistent chat history and conversation tracking
+- **Session Persistence**: Chat history maintained during session
 - **PDF Report Generation**: Downloadable assessment reports
 - **Multi-Agent Architecture**: Specialized agents for different aspects of mental health support
 
 ## 🏗️ Architecture
 
-### Frontend (Flask Web Application)
-- **Templates**: HTML templates with modern CSS styling
-- **Static Assets**: CSS files, images, and client-side JavaScript
-- **Routes**: Web endpoints for UI rendering and user interactions
+### Gradio Interface (`app.py`)
+- **Multi-tab Interface**: Chat, Voice, Assessment, Resources, and About tabs
+- **Real-time Chat**: Message processing with typing indicators
+- **Voice Processing**: Whisper integration for speech-to-text
+- **Assessment Integration**: Interactive mental health questionnaires
+- **Session Management**: User context and history preservation
 
 ### Backend Services
 
 #### Flask Application (`main.py`)
-- User authentication and session management
-- Web interface routing
+- Core chat response generation
 - Voice processing (Whisper integration)
 - Text-to-Speech generation (Edge TTS)
 - Database operations (SQLite with SQLAlchemy)
 - Chat session management
 
-#### FastAPI Application (`fastapi_app.py`)
-- AI message processing endpoints
-- CrewAI integration for multi-agent responses
-- RAG system integration
-- Sentiment analysis
-- Assessment processing
-- PDF report generation
-
-### AI Agents System (`crew_ai/`)
+#### AI Agents System (`crew_ai/`)
 - **Crisis Detection Agent**: Identifies emergency situations
 - **Mental Condition Classifier**: Categorizes mental health concerns
 - **RAG Agents**: Knowledge retrieval and summarization
@@ -62,18 +55,18 @@ A comprehensive multi-agent mental health support application that combines AI-p
 - **Vector Store**: Knowledge base for RAG system
 - **Session Storage**: Temporary chat data and user context
 
-## 🚀 Docker Deployment for Render.com
+## 🚀 Hugging Face Spaces Deployment
 
-This application is optimized for single-container Docker deployment on Render.com.
+This application is optimized for deployment on Hugging Face Spaces using Gradio.
 
 ### Prerequisites
-- Docker
+- Hugging Face account
 - Git
-- Render.com account
+- Required API keys (Google, OpenAI, Groq)
 
 ### Environment Variables
 
-Create the following environment variables in your Render deployment:
+Set the following secrets in your Hugging Face Space:
 
 #### Required API Keys
 ```env
@@ -86,191 +79,145 @@ OPENAI_API_KEY=your_openai_api_key
 ```env
 SECRET_KEY=your_super_secure_secret_key
 FLASK_SECRET_KEY=your_flask_secret_key
-SESSION_COOKIE_SECURE=true
 ```
 
 #### Optional Configuration
 ```env
 FLASK_ENV=production
 DEBUG=false
-ALLOWED_ORIGINS=https://yourdomain.onrender.com
+HUGGINGFACE_SPACES=1
 ```
 
 ### Deployment Steps
 
-1. **Fork or Clone Repository**
+1. **Create a New Space**
+   - Go to [Hugging Face Spaces](https://huggingface.co/spaces)
+   - Click "Create new Space"
+   - Choose **Gradio** as the SDK
+   - Select **Python** as the programming language
+
+2. **Upload Your Code**
    ```bash
-   git clone <repository-url>
+   git clone <your-repository>
    cd bhutan
+   
+   # Initialize git for Spaces
+   git init
+   git remote add origin https://huggingface.co/spaces/YOUR_USERNAME/YOUR_SPACE_NAME
+   
+   # Add and commit files
+   git add .
+   git commit -m "Initial deployment to Hugging Face Spaces"
+   git push -u origin main
    ```
 
-2. **Connect to Render**
-   - Create a new **Web Service** on Render.com
-   - Connect your GitHub repository
-   - Choose **Docker** as the runtime
+3. **Configure Space Settings**
+   - **Hardware**: Choose CPU Basic (free) or upgrade for better performance
+   - **Visibility**: Public or Private as preferred
+   - **Secrets**: Add all required environment variables in the Settings tab
 
-3. **Configure Render Settings**
-   - **Name**: `mental-health-chatbot`
-   - **Region**: Choose your preferred region
-   - **Branch**: `main` (or your deployment branch)
-   - **Root Directory**: Leave empty (uses repository root)
-   - **Dockerfile Path**: `./Dockerfile`
+4. **Set Up Dependencies**
+   The `requirements.txt` file is already configured for Spaces deployment with:
+   - Gradio for the interface
+   - Flask for backend logic
+   - AI/ML libraries (optimized versions)
+   - All necessary dependencies
 
-4. **Set Environment Variables**
-   Add all required environment variables in the Render dashboard under "Environment"
+5. **Entry Point**
+   The application uses `app.py` as the main entry point, which:
+   - Creates a Gradio Blocks interface
+   - Integrates all Flask backend functionality
+   - Provides tabs for Chat, Voice, Assessment, Resources, and About
+   - Handles session management and user interactions
 
-5. **Deploy**
-   - Click "Create Web Service"
-   - Render will automatically build and deploy using the Dockerfile
-   - Monitor the deployment logs for any issues
+### Space Configuration
 
-### Dockerfile Configuration
+#### Hardware Requirements
+- **CPU Basic**: Suitable for basic chat functionality
+- **CPU Upgrade**: Recommended for full AI features including voice processing
+- **GPU**: Not required but can improve response times
 
-The included `Dockerfile` is optimized for Render deployment:
+#### File Structure for Spaces
+```
+app.py                 # Main Gradio entry point
+requirements.txt       # Hugging Face Spaces dependencies
+README.md             # This documentation
+main.py               # Flask backend logic
+config_manager.py     # Configuration management
+models/               # Database models
+crew_ai/              # AI agents system
+knowledge/            # Knowledge base files
+static/               # CSS and assets
+templates/            # HTML templates (used by Flask components)
+```
 
-- Uses Python 3.11 slim base image
-- Installs all system dependencies (gcc, ffmpeg, etc.)
-- Sets up proper port handling with `$PORT` environment variable
-- Includes health checks for monitoring
-- Uses `render_start.py` for optimized startup
+### Features in Spaces
 
-### Startup Process
+#### Chat Tab
+- Real-time conversation with AI mental health assistant
+- Message history preservation during session
+- Typing indicators and response streaming
+- Crisis detection and appropriate responses
 
-The application uses `render_start.py` which:
+#### Voice Tab
+- Speech-to-text using Whisper
+- Text-to-speech for responses
+- Voice conversation mode
+- Audio file upload support
 
-1. **Starts FastAPI Backend**: Launches on an internal port as a background service
-2. **Starts Flask Frontend**: Runs on the main Render port (`$PORT`)
-3. **Health Monitoring**: Both services include health check endpoints
-4. **Graceful Shutdown**: Handles termination signals properly
+#### Assessment Tab
+- Interactive mental health questionnaires
+- Real-time scoring and analysis
+- PDF report generation
+- Assessment history tracking
 
-### Health Checks
+#### Resources Tab
+- Mental health resources and information
+- Crisis hotlines and emergency contacts
+- Self-help tools and techniques
+- Educational materials
 
-- **Flask Health**: `https://yourdomain.onrender.com/health`
-- **FastAPI Health**: Internal health checks for service communication
+#### About Tab
+- Application information and usage guide
+- Privacy policy and data handling
+- Contact information and support
 
 ### Monitoring and Logs
 
-Access logs through the Render dashboard:
-- **Deploy Logs**: Build and deployment information
-- **Service Logs**: Application runtime logs
-- **Metrics**: CPU, memory, and request metrics
+Access logs and metrics through the Hugging Face Spaces interface:
+- **Build Logs**: Installation and setup information
+- **Application Logs**: Runtime logs and error messages
+- **Usage Analytics**: Space visits and user interactions
 
 ### Troubleshooting
 
 #### Common Issues
 
 1. **Build Failures**
-   - Check that all required environment variables are set
-   - Verify API keys are valid
+   - Check that all required secrets are set correctly
+   - Verify API keys are valid and have sufficient quotas
    - Review build logs for missing dependencies
 
-2. **Service Timeouts**
-   - Increase health check timeout in Render settings
-   - Monitor startup logs for initialization issues
-   - Ensure sufficient memory allocation
+## 📚 Additional Resources
 
-3. **Database Issues**
-   - The application uses SQLite by default (file-based)
-   - Data persists between deployments in `/app/data/`
-   - For production, consider upgrading to PostgreSQL via Render add-ons
+### Documentation
+- **API Documentation**: Available at `/docs` endpoint when running
+- **Agent Configuration**: See `config/` directory for YAML configurations
+- **Database Schema**: Check `models/` directory for SQLAlchemy models
 
-#### Performance Optimization
+### Support
+- **GitHub Issues**: For bug reports and feature requests
+- **Community Discussions**: Join the Hugging Face Space comments
+- **Documentation Updates**: Contributing to improve documentation is welcome
 
-- **Memory**: Recommended minimum 1GB RAM
-- **CPU**: Single CPU core sufficient for moderate traffic
-- **Scaling**: Render auto-scales based on traffic
-- **Response Time**: Typical response time under 2 seconds
+### License
+This project is open source. Please check the LICENSE file for details.
 
-## 📱 Usage Guide
+---
 
-### For Users
+**Ready for Hugging Face Spaces!** 🚀
 
-#### Getting Started
-1. **Registration**: Create an account or use guest access
-2. **Assessment**: Complete initial mental health assessments
-3. **Chat**: Start conversations with the AI assistant
-4. **Dashboard**: View your progress and assessment history
-
-#### Chat Features
-- **Text Messages**: Type messages and receive AI responses
-- **Voice Input**: Click the microphone icon to speak
-- **Text-to-Speech**: Click the speaker icon to hear responses
-- **Message History**: Previous conversations are saved and accessible
-
-#### Assessments
-- **PHQ-9**: Depression screening
-- **GAD-7**: Anxiety assessment
-- **DAST-10**: Substance abuse screening
-- **AUDIT**: Alcohol use assessment
-- **Bipolar**: Bipolar disorder screening
-
-### For Developers
-
-#### Local Development
-
-For local development and testing:
-
-```bash
-# Clone the repository
-git clone <repository-url>
-cd bhutan
-
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Set environment variables
-cp .env.example .env
-# Edit .env with your API keys
-
-# Run locally (development mode)
-python main.py  # Flask on port 5000
-python -m uvicorn fastapi_app:app --port 8000  # FastAPI on port 8000
-```
-
-#### Adding New Features
-
-1. **New Assessments**: Add questionnaire JSON files in `crew_ai/questionnaires/`
-2. **Custom Agents**: Modify configurations in `config/agents.yaml`
-3. **Knowledge Base**: Add PDF documents to `knowledge/` directory
-4. **UI Updates**: Modify templates in `templates/` and styles in `static/`
-
-#### Docker Testing
-
-Test the Docker build locally before deploying:
-
-```bash
-# Build the Docker image
-docker build -t mental-health-app .
-
-# Run locally with Docker
-docker run -p 10000:10000 --env-file .env mental-health-app
-
-# Test health endpoints
-curl http://localhost:10000/health
-```
-
-## 🔧 Configuration
-
-### Environment Variables Reference
-
-| Variable | Required | Description | Default |
-|----------|----------|-------------|---------|
-| `GOOGLE_API_KEY` | Yes | Google AI API key | - |
-| `GROQ_API_KEY` | Yes | Groq API key | - |
-| `OPENAI_API_KEY` | Yes | OpenAI API key | - |
-| `SECRET_KEY` | Yes | Flask secret key | - |
-| `PORT` | No | Application port | 10000 |
-| `FLASK_ENV` | No | Flask environment | production |
-| `DEBUG` | No | Debug mode | false |
-| `ALLOWED_ORIGINS` | No | CORS origins | * |
-
-### Agent Configuration
-
-The AI agents can be configured via `config/agents.yaml`:
+This application has been fully optimized for Hugging Face Spaces deployment with Gradio interface, removing all Docker and Render-specific configurations.
 
 ```yaml
 emotion_detector:

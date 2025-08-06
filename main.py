@@ -86,27 +86,33 @@ def extract_topics(text):
 
 # Load Whisper model once at startup with memory optimization
 whisper_model = None
-try:
-    import openai_whisper as whisper  # Try openai-whisper first
-    if hasattr(whisper, 'load_model'):
-        # Use tiny model with memory optimization for Render
-        whisper_model = whisper.load_model("tiny", device="cpu", download_root="/tmp")
-        print("✅ OpenAI Whisper model loaded successfully (tiny, CPU-optimized)")
-    else:
-        print("⚠️ OpenAI Whisper load_model not available")
-        whisper_model = None
-except ImportError:
+
+# Check if AI models should be skipped (free tier mode)
+if os.environ.get('SKIP_AI_MODELS') == '1' or os.environ.get('MEMORY_MODE') == 'free_tier':
+    print("🔧 Skipping Whisper model loading - running in free tier mode")
+    whisper_model = None
+else:
     try:
-        import whisper  # Fallback to regular whisper
+        import openai_whisper as whisper  # Try openai-whisper first
         if hasattr(whisper, 'load_model'):
+            # Use tiny model with memory optimization for Render
             whisper_model = whisper.load_model("tiny", device="cpu", download_root="/tmp")
-            print("✅ Whisper model loaded successfully (tiny, CPU-optimized)")
+            print("✅ OpenAI Whisper model loaded successfully (tiny, CPU-optimized)")
         else:
-            print("⚠️ Whisper load_model not available, using fallback")
+            print("⚠️ OpenAI Whisper load_model not available")
             whisper_model = None
-    except Exception as e:
-        print(f"⚠️ Whisper not available: {e}")
-        whisper_model = None
+    except ImportError:
+        try:
+            import whisper  # Fallback to regular whisper
+            if hasattr(whisper, 'load_model'):
+                whisper_model = whisper.load_model("tiny", device="cpu", download_root="/tmp")
+                print("✅ Whisper model loaded successfully (tiny, CPU-optimized)")
+            else:
+                print("⚠️ Whisper load_model not available, using fallback")
+                whisper_model = None
+        except Exception as e:
+            print(f"⚠️ Whisper not available: {e}")
+            whisper_model = None
 
 # Cache for TTS to avoid regenerating same text
 tts_cache = {}
@@ -119,6 +125,13 @@ def get_cached_tts(text_hash):
 @app.route('/transcribe', methods=['POST'])
 def transcribe():
     try:
+        # Check if Whisper is available
+        if not whisper_model:
+            return jsonify({
+                'error': 'Voice transcription is not available in this deployment mode. Please type your message instead.',
+                'transcript': ''
+            }), 503
+        
         if 'audio' not in request.files:
             return jsonify({'error': 'No audio file provided'}), 400
         
@@ -1718,17 +1731,19 @@ def clear_session():
 
 
 if __name__ == "__main__":
-    # Production settings
+    # For Hugging Face Spaces compatibility
     debug_mode = os.getenv('DEBUG', 'False').lower() == 'true'
     host = os.getenv('HOST', '0.0.0.0')
     port = int(os.getenv('PORT', 5000))
     
+    # Initialize database
+    init_db()
+    
     if debug_mode:
         app.run(debug=True, host=host, port=port)
     else:
-        # In production, this should be run with gunicorn
-        print("Warning: Running Flask development server in production. Use gunicorn instead.")
-        app.run(debug=False, host=host, port=port)
+        # For Hugging Face Spaces, this runs as a background service to app.py
+        app.run(debug=False, host=host, port=port, threaded=True)
 
 def init_db():
     """Initialize the database with tables"""

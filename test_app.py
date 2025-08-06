@@ -121,9 +121,9 @@ def main():
     if all_passed:
         print("✅ All tests passed! Application is ready to start.")
         print("\n🚀 To start the application:")
-        print("   python start_services.py")
-        print("   # Or using Docker:")
-        print("   docker compose up -d")
+        print("   python app.py  # For Hugging Face Spaces")
+        print("   # Or for local development:")
+        print("   python main.py")
     else:
         print("❌ Some tests failed. Please fix the issues above.")
         sys.exit(1)

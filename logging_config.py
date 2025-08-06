@@ -55,9 +55,9 @@ def setup_logging(log_level: str = "INFO", log_file: str = None):
     error_handler.setFormatter(formatter)
     root_logger.addHandler(error_handler)
     
-    # Set specific logger levels
-    logging.getLogger("uvicorn").setLevel(logging.INFO)
-    logging.getLogger("gunicorn").setLevel(logging.INFO)
+    # Set specific logger levels for Hugging Face Spaces
+    logging.getLogger("gradio").setLevel(logging.INFO)
+    logging.getLogger("flask").setLevel(logging.INFO)
     logging.getLogger("werkzeug").setLevel(logging.WARNING)
     
     return root_logger
