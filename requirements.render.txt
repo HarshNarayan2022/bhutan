@@ -13,6 +13,7 @@ uvicorn[standard]==0.24.0
 numpy<2.0.0
 transformers==4.35.0
 sentence-transformers==2.2.2
+openai-whisper==20231117
 
 # LangChain Core (minimal for basic AI functionality)
 langchain==0.1.20
