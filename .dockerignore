@@ -1,0 +1,132 @@
+# Docker ignore file for Render deployment
+# Excludes unnecessary files from Docker build context
+
+# Python cache and temp files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+env.bak/
+venv.bak/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Git
+.git/
+.github/
+.gitignore
+.gitattributes
+
+# Logs
+logs/
+*.log
+
+# Development files
+test_*.py
+*_test.py
+validate_*.py
+deploy_*.py
+start_*.sh
+
+# Documentation (keep essential ones)
+docs/
+CONTRIBUTING.md
+CHANGELOG.md
+
+# Config files not needed in container
+.env
+.env.local
+.env.development
+.env.production
+.env.example
+
+# Large model files (not needed for lightweight version)
+models/
+data/raw/
+data/processed/
+
+# Jupyter notebooks
+*.ipynb
+.ipynb_checkpoints/
+
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+
+# pytest
+.pytest_cache/
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Database files (will be created in container)
+*.db
+*.sqlite
+*.sqlite3
+
+# Chat sessions (will be created in container)
+chat_sessions/
+
+# Backup files
+*.backup
+*.bak
+
+# Temporary files
+tmp/
+temp/
+
+# Node modules (if any)
+node_modules/
+
+# Heavy requirements (use lightweight version)
+requirements.txt
+requirements_full.txt
+
+# Old app versions (use app_render.py only)
+app.py
+main.py
+fastapi_app.py
+
+# Development scripts
+scripts/
+migrations/

@@ -933,63 +933,116 @@ def process_complete_assessment():
     try:
         assessment_data = session.get('assessment_data', {})
         
-        # Import questionnaire processing
-        from crew_ai.questionnaire import (
-            calculate_phq9_score, calculate_gad7_score, 
-            calculate_dast10_score, calculate_audit_score, 
-            calculate_bipolar_score, get_assessment_recommendations
-        )
+        # Import questionnaire processing (with fallback for missing dependencies)
+        try:
+            from crew_ai.questionnaire import (
+                calculate_phq9_score, calculate_gad7_score, 
+                calculate_dast10_score, calculate_audit_score, 
+                calculate_bipolar_score, get_assessment_recommendations
+            )
+            use_advanced_scoring = True
+        except ImportError:
+            print("⚠️ Advanced scoring unavailable - using basic scoring")
+            use_advanced_scoring = False
         
         # Calculate scores for each questionnaire
         scores = {}
         
-        # PHQ-9 Depression Score
-        phq9_responses = [int(assessment_data.get(f'PHQ9_{i}', 0)) for i in range(1, 10)]
-        scores['phq9'] = calculate_phq9_score(phq9_responses)
+        if use_advanced_scoring:
+            # PHQ-9 Depression Score
+            phq9_responses = [int(assessment_data.get(f'PHQ9_{i}', 0)) for i in range(1, 10)]
+            scores['phq9'] = calculate_phq9_score(phq9_responses)
+            
+            # GAD-7 Anxiety Score  
+            gad7_responses = [int(assessment_data.get(f'GAD7_{i}', 0)) for i in range(1, 8)]
+            scores['gad7'] = calculate_gad7_score(gad7_responses)
+            
+            # DAST-10 Substance Use Score
+            dast_responses = []
+            for i in range(1, 11):
+                response = assessment_data.get(f'DAST_{i}', 'No')
+                # Convert to score based on question (some are reverse scored)
+                if i == 3:  # Question 3 is reverse scored
+                    dast_responses.append(1 if response == 'No' else 0)
+                else:
+                    dast_responses.append(1 if response == 'Yes' else 0)
+            scores['dast10'] = calculate_dast10_score(dast_responses)
+        else:
+            # Basic scoring when advanced functions not available
+            # PHQ-9 Depression Score (sum of responses)
+            phq9_responses = [int(assessment_data.get(f'PHQ9_{i}', 0)) for i in range(1, 10)]
+            scores['phq9'] = {
+                'score': sum(phq9_responses),
+                'interpretation': 'Basic scoring - total: ' + str(sum(phq9_responses)),
+                'severity': 'mild' if sum(phq9_responses) < 10 else 'moderate' if sum(phq9_responses) < 15 else 'severe'
+            }
+            
+            # GAD-7 Anxiety Score (sum of responses)
+            gad7_responses = [int(assessment_data.get(f'GAD7_{i}', 0)) for i in range(1, 8)]
+            scores['gad7'] = {
+                'score': sum(gad7_responses),
+                'interpretation': 'Basic scoring - total: ' + str(sum(gad7_responses)),
+                'severity': 'mild' if sum(gad7_responses) < 10 else 'moderate' if sum(gad7_responses) < 15 else 'severe'
+            }
+            
+            # Basic DAST-10 scoring
+            scores['dast10'] = {
+                'score': 0,
+                'interpretation': 'Basic scoring not available for substance use assessment',
+                'severity': 'unknown'
+            }
         
-        # GAD-7 Anxiety Score  
-        gad7_responses = [int(assessment_data.get(f'GAD7_{i}', 0)) for i in range(1, 8)]
-        scores['gad7'] = calculate_gad7_score(gad7_responses)
-        
-        # DAST-10 Substance Use Score
-        dast_responses = []
-        for i in range(1, 11):
-            response = assessment_data.get(f'DAST_{i}', 'No')
-            # Convert to score based on question (some are reverse scored)
-            if i == 3:  # Question 3 is reverse scored
-                dast_responses.append(1 if response == 'No' else 0)
-            else:
-                dast_responses.append(1 if response == 'Yes' else 0)
-        scores['dast10'] = calculate_dast10_score(dast_responses)
-        
-        # AUDIT Alcohol Use Score
-        audit_responses = []
-        audit_scoring = {
-            'AUDIT_1': {'Never': 0, 'Monthly or less': 1, '2 to 4 times a month': 2, '2 to 3 times a week': 3, '4 or more times a week': 4},
-            'AUDIT_2': {'1 or 2': 0, '3 or 4': 1, '5 or 6': 2, '7, 8, or 9': 3, '10 or more': 4},
-            'AUDIT_3': {'Never': 0, 'Less than monthly': 1, 'Monthly': 2, 'Weekly': 3, 'Daily or almost daily': 4},
-            'AUDIT_4': {'Never': 0, 'Less than monthly': 1, 'Monthly': 2, 'Weekly': 3, 'Daily or almost daily': 4},
-            'AUDIT_5': {'Never': 0, 'Less than monthly': 1, 'Monthly': 2, 'Weekly': 3, 'Daily or almost daily': 4},
-            'AUDIT_6': {'Never': 0, 'Less than monthly': 1, 'Monthly': 2, 'Weekly': 3, 'Daily or almost daily': 4},
-            'AUDIT_7': {'Never': 0, 'Less than monthly': 1, 'Monthly': 2, 'Weekly': 3, 'Daily or almost daily': 4},
-            'AUDIT_8': {'Never': 0, 'Less than monthly': 1, 'Monthly': 2, 'Weekly': 3, 'Daily or almost daily': 4},
-            'AUDIT_9': {'No': 0, 'Yes, but not in the last year': 2, 'Yes, during the last year': 4},
-            'AUDIT_10': {'No': 0, 'Yes, but not in the last year': 2, 'Yes, during the last year': 4}
-        }
-        
-        for i in range(1, 11):
-            field = f'AUDIT_{i}'
-            response = assessment_data.get(field, '')
-            score = audit_scoring.get(field, {}).get(response, 0)
-            audit_responses.append(score)
-        scores['audit'] = calculate_audit_score(audit_responses)
-        
-        # Bipolar Screening Score
-        bipolar_responses = [1 if assessment_data.get(f'BIPOLAR_{i}', 'No') == 'Yes' else 0 for i in range(1, 12)]
-        scores['bipolar'] = calculate_bipolar_score(bipolar_responses)
+        if use_advanced_scoring:
+            # AUDIT Alcohol Use Score
+            audit_responses = []
+            audit_scoring = {
+                'AUDIT_1': {'Never': 0, 'Monthly or less': 1, '2 to 4 times a month': 2, '2 to 3 times a week': 3, '4 or more times a week': 4},
+                'AUDIT_2': {'1 or 2': 0, '3 or 4': 1, '5 or 6': 2, '7, 8, or 9': 3, '10 or more': 4},
+                'AUDIT_3': {'Never': 0, 'Less than monthly': 1, 'Monthly': 2, 'Weekly': 3, 'Daily or almost daily': 4},
+                'AUDIT_4': {'Never': 0, 'Less than monthly': 1, 'Monthly': 2, 'Weekly': 3, 'Daily or almost daily': 4},
+                'AUDIT_5': {'Never': 0, 'Less than monthly': 1, 'Monthly': 2, 'Weekly': 3, 'Daily or almost daily': 4},
+                'AUDIT_6': {'Never': 0, 'Less than monthly': 1, 'Monthly': 2, 'Weekly': 3, 'Daily or almost daily': 4},
+                'AUDIT_7': {'Never': 0, 'Less than monthly': 1, 'Monthly': 2, 'Weekly': 3, 'Daily or almost daily': 4},
+                'AUDIT_8': {'Never': 0, 'Less than monthly': 1, 'Monthly': 2, 'Weekly': 3, 'Daily or almost daily': 4},
+                'AUDIT_9': {'No': 0, 'Yes, but not in the last year': 2, 'Yes, during the last year': 4},
+                'AUDIT_10': {'No': 0, 'Yes, but not in the last year': 2, 'Yes, during the last year': 4}
+            }
+            
+            for i in range(1, 11):
+                field = f'AUDIT_{i}'
+                response = assessment_data.get(field, '')
+                score = audit_scoring.get(field, {}).get(response, 0)
+                audit_responses.append(score)
+            scores['audit'] = calculate_audit_score(audit_responses)
+            
+            # Bipolar Screening Score
+            bipolar_responses = [1 if assessment_data.get(f'BIPOLAR_{i}', 'No') == 'Yes' else 0 for i in range(1, 12)]
+            scores['bipolar'] = calculate_bipolar_score(bipolar_responses)
+        else:
+            # Basic AUDIT scoring
+            scores['audit'] = {
+                'score': 0,
+                'interpretation': 'Basic scoring not available for alcohol assessment',
+                'severity': 'unknown'
+            }
+            
+            # Basic Bipolar scoring
+            scores['bipolar'] = {
+                'score': 0,
+                'interpretation': 'Basic scoring not available for bipolar assessment', 
+                'severity': 'unknown'
+            }
         
         # Calculate overall assessment
-        recommendations = get_assessment_recommendations(scores)
+        if use_advanced_scoring:
+            recommendations = get_assessment_recommendations(scores)
+        else:
+            # Basic recommendations
+            recommendations = {
+                'overall_assessment': 'Basic assessment completed. Professional evaluation recommended for detailed analysis.',
+                'next_steps': ['Consult with a mental health professional', 'Monitor your mental health regularly'],
+                'resources': ['Contact local health services', 'Consider professional counseling']
+            }
         
         # Store results in session for chatbot context
         assessment_results = {
@@ -1730,6 +1783,55 @@ def clear_session():
     return jsonify({"status": "success", "redirect": url_for('home')})
 
 
+def get_chat_response(message, session_id=None):
+    """Simple chat response function for integration with Gradio app"""
+    try:
+        # Default backend URL
+        backend_url = os.getenv('BACKEND_URL', 'http://localhost:8000')
+        
+        # Simple user context for Gradio integration
+        user_context = {
+            "emotion": "neutral",
+            "name": "User",
+            "mental_health_status": "Unknown", 
+            "age": "",
+            "original_query": message,
+            "message_count": 1
+        }
+        
+        # Make request to FastAPI backend
+        response = requests.post(
+            f"{backend_url}/process_message",
+            json={
+                "message": message,
+                "user_context": user_context,
+                "session_id": session_id or "gradio_session"
+            },
+            timeout=30
+        )
+        
+        if response.status_code == 200:
+            result = response.json()
+            return result.get("response", "I'm sorry, I couldn't process your request.")
+        else:
+            return "I'm having trouble connecting to the chat backend. Please try again."
+            
+    except Exception as e:
+        print(f"Error in get_chat_response: {e}")
+        return "I'm sorry, I'm having technical difficulties. Please try again later."
+
+
+def init_db():
+    """Initialize the database with tables"""
+    try:
+        Base.metadata.create_all(engine)
+        print("✅ Database tables created/verified successfully")
+        return True
+    except Exception as e:
+        print(f"❌ Error creating database tables: {e}")
+        return False
+
+
 if __name__ == "__main__":
     # For Hugging Face Spaces compatibility
     debug_mode = os.getenv('DEBUG', 'False').lower() == 'true'
@@ -1744,13 +1846,3 @@ if __name__ == "__main__":
     else:
         # For Hugging Face Spaces, this runs as a background service to app.py
         app.run(debug=False, host=host, port=port, threaded=True)
-
-def init_db():
-    """Initialize the database with tables"""
-    try:
-        Base.metadata.create_all(engine)
-        print("✅ Database tables created/verified successfully")
-        return True
-    except Exception as e:
-        print(f"❌ Error creating database tables: {e}")
-        return False

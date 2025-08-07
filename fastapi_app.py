@@ -75,25 +75,45 @@ async def lifespan(app: FastAPI):
     print("🚀 Starting FastAPI server...")
     
     try:
-        # Import here to avoid circular imports
-        from Chat_sentiment_analysis import ChatSentimentAnalyzer
-        from agents.shared_rag import shared_rag_instance
-        
+        # Import here to avoid circular imports (with fallback for missing dependencies)
+        try:
+            from Chat_sentiment_analysis import ChatSentimentAnalyzer
+            sentiment_analyzer_available = True
+        except ImportError as e:
+            print(f"⚠️ Sentiment analyzer unavailable: {e}")
+            sentiment_analyzer_available = False
+            
+        try:
+            from agents.shared_rag import shared_rag_instance
+            rag_available = True
+        except ImportError as e:
+            print(f"⚠️ RAG agent unavailable: {e}")
+            rag_available = False
+            
         # Initialize sentiment analyzer in background
         global sentiment_analyzer
-        print("🧠 Loading sentiment analyzer model...")
-        sentiment_analyzer = ChatSentimentAnalyzer()
-        print("✅ Sentiment analyzer ready")
-        
+        if sentiment_analyzer_available:
+            print("🧠 Loading sentiment analyzer model...")
+            sentiment_analyzer = ChatSentimentAnalyzer()
+            print("✅ Sentiment analyzer ready")
+        else:
+            sentiment_analyzer = None
+            print("⚠️ Using basic sentiment analysis")
+            
         # Get the shared RAG instance (this handles all initialization)
-        print("📚 Getting shared RAG instance...")
-        rag = shared_rag_instance.get_rag()
-        print("✅ Shared RAG instance ready")
-        
-        # Store in app state
-        app.state.rag = rag
-        app.state.config = shared_rag_instance.config
-        
+        if rag_available:
+            print("📚 Getting shared RAG instance...")
+            rag = shared_rag_instance.get_rag()
+            print("✅ Shared RAG instance ready")
+            
+            # Store in app state
+            app.state.rag = rag
+            app.state.config = shared_rag_instance.config
+        else:
+            print("⚠️ Using basic response generation")
+            app.state.rag = None
+            app.state.config = None
+            
         # Initialize response cache
         print("🗄️ Initializing response cache...")
         app.state.response_cache = {}

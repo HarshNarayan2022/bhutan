@@ -1,0 +1,47 @@
+#!/usr/bin/env python3
+"""
+Render Deployment Configuration
+For mental health chatbot optimized for 512MB RAM
+"""
+
+services:
+  - type: web
+    name: mental-health-chatbot
+    env: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    region: oregon
+    branch: main
+    
+    # Memory optimization for free tier (512MB)
+    autoDeploy: true
+    rootDir: .
+    
+    # Environment variables
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      - key: PYTHONDONTWRITEBYTECODE
+        value: "1"
+      - key: PORT
+        value: "10000"
+      - key: SECRET_KEY
+        generateValue: true
+    
+    # Health check configuration
+    healthCheckPath: /health
+    
+    # Build configuration
+    buildCommand: echo "Using Docker build"
+    startCommand: python app_render.py
+    
+    # Scaling (free tier limitations)
+    numInstances: 1
+    
+    # Disk size (free tier)
+    disk:
+      name: mental-health-data
+      mountPath: /app/data
+      sizeGB: 1
