@@ -36,7 +36,7 @@ numpy==1.24.4
 
 # Basic NLP without heavy models
 nltk==3.8.1
-
+# Sentence transformers (lightweight)
 # TTS (lightweight)
 edge-tts==6.1.9
 
