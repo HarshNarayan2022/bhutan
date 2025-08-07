@@ -122,10 +122,9 @@ node_modules/
 requirements.txt
 requirements_full.txt
 
-# Old app versions (use app_render.py only)
-app.py
-main.py
-fastapi_app.py
+# Old app versions (not needed for production)
+app_render.py
+app_minimal.py
 
 # Development scripts
 scripts/

@@ -144,9 +144,8 @@ async def create_app():
     
     app = web.Application()
     
-    # Health check
+    # Health check (GET route automatically handles HEAD)
     app.router.add_get('/health', proxy.health_check)
-    app.router.add_head('/health', proxy.health_check)
     
     # API routes to FastAPI
     app.router.add_route('*', '/api/{path:.*}', proxy.proxy_to_fastapi)
