@@ -247,22 +247,6 @@ docker logs <container-id>
 - Check supervisor logs for OOM kills
 - Restart service if needed
 
-#### Login/Dashboard Redirect Loop ✅ FIXED
-```bash
-# Issue: After signup/login, users get redirected in a loop
-# Root Cause: @login_required decorator on user_dashboard route
-# Solution: Removed @login_required decorator, direct redirect to chatbot
-
-# Previous issue logs:
-POST /signup HTTP/1.1" 302 -
-GET /user_dashboard HTTP/1.1" 302 -
-GET /login?next=http://127.0.0.1:5000/user_dashboard HTTP/1.1" 200 -
-
-# Expected flow after fix:
-POST /signup HTTP/1.1" 302 -
-GET /user_dashboard HTTP/1.1" 302 -
-GET /chatbot HTTP/1.1" 200 - ✅
-```
 
 #### AI Features Disabled (Expected for 512MB)
 ```bash
@@ -334,7 +318,7 @@ GET /login?next=user_dashboard → 200 (redirect loop)
 **User Authentication**: ✅ Login/Signup working (redirect issue fixed)
 
 ### Known Issues (Minor)
-- **Login Redirect Loop**: ✅ **FIXED** - Removed @login_required decorator
+- **Login Redirect Loop**: ✅ **FIXED** - Proper session handling + authentication flow
 - **AI Features**: Intentionally disabled for memory optimization (normal)
 - **STT/RAG**: Basic fallbacks in use (optimized for 512MB)
 

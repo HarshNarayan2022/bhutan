@@ -49,10 +49,11 @@ app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY', os.getenv('FLASK_SECRET_KEY', 'mental_health_app'))
 app.config["SESSION_COOKIE_NAME"] = "mental_health_app_session"
 app.config["SESSION_COOKIE_HTTPONLY"] = True
-app.config["SESSION_COOKIE_SECURE"] = False  # Set to True in production
+app.config["SESSION_COOKIE_SECURE"] = False  # Set to True in production with HTTPS
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
-app.config["SESSION_PERMANENT"] = False
+app.config["SESSION_PERMANENT"] = True  # Allow permanent sessions
 app.config["PERMANENT_SESSION_LIFETIME"] = 3600  # 1 hour
+app.config["SESSION_USE_SIGNER"] = True  # Extra security for session cookies
 
 # FastAPI backend URL - configurable for different deployment environments
 BACKEND_URL = os.getenv('BACKEND_URL', 'http://localhost:8000')
@@ -432,8 +433,22 @@ Base.metadata.create_all(engine)
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if 'user_id' not in session:
-            return redirect(url_for('login', next=request.url))
+        user_id = session.get('user_id')
+        all_session_keys = list(session.keys())
+        
+        print(f"🔐 login_required check for {request.endpoint}:")
+        print(f"   user_id in session: {user_id}")
+        print(f"   all session keys: {all_session_keys}")
+        print(f"   session cookie name: {app.config.get('SESSION_COOKIE_NAME')}")
+        print(f"   request path: {request.path}")
+        print(f"   request method: {request.method}")
+        
+        if 'user_id' not in session or session.get('user_id') is None:
+            print(f"❌ Access denied to {request.endpoint} - no valid user_id in session")
+            next_url = request.url if request.method == 'GET' else request.path
+            return redirect(url_for('login', next=next_url))
+        
+        print(f"✅ Access granted to {request.endpoint} for user_id={user_id}")
         return f(*args, **kwargs)
     return decorated_function
 
@@ -548,6 +563,11 @@ def login():
             if remember:
                 session.permanent = True
             
+            # Ensure session is properly marked as modified
+            session.modified = True
+            
+            print(f"✅ User {user.username} logged in successfully, session set: user_id={user.id}")
+            
             db_session.close()
             return redirect(url_for('user_dashboard'))
         else:
@@ -613,13 +633,27 @@ def signup():
         db_session.add(new_user)
         db_session.commit()
         
-        # Auto-login the new user
+        # Auto-login the new user - ensure session persists properly
+        session.clear()  # Clear any existing session data
         session['user_id'] = new_user.id
         session['username'] = new_user.username
         session['user_data'] = {
             'name': new_user.full_name,
             'has_completed_survey': False
         }
+        
+        # Force session to be saved immediately
+        session.permanent = True
+        session.modified = True
+        
+        # Commit database changes before redirect
+        db_session.commit()
+        
+        print(f"✅ User {new_user.username} signed up and logged in, session set: user_id={new_user.id}")
+        
+        # Give the session a moment to persist before redirect
+        import time
+        time.sleep(0.1)
         
         db_session.close()
         
@@ -630,11 +664,25 @@ def signup():
 # Find your user_dashboard function and replace it with:
 
 @app.route('/user_dashboard')
+@login_required
 def user_dashboard():
-    """User dashboard - simplified for 512MB deployment"""
-    # For 512MB optimization, redirect directly to chatbot
-    # No login check needed here since chatbot handles guest/user modes
-    return redirect(url_for('chatbot'))
+    """User dashboard - requires login for assessment access"""
+    user_data = session.get('user_data', {})
+    user_id = session.get('user_id')
+    
+    print(f"🏠 Dashboard accessed by user_id: {user_id}, user_data: {user_data}")
+    
+    # Check if user has completed assessment
+    has_completed_survey = user_data.get('has_completed_survey', False)
+    
+    if not has_completed_survey:
+        # New user - redirect to assessment
+        print(f"📝 Redirecting user {user_id} to assessment (no survey completed)")
+        return redirect(url_for('assessment'))
+    else:
+        # User has completed assessment - redirect to chatbot
+        print(f"💬 Redirecting user {user_id} to chatbot (survey completed)")
+        return redirect(url_for('chatbot'))
 
 # Add new route for assessment
 @app.route('/assessment')
