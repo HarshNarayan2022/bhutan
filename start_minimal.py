@@ -49,6 +49,7 @@ def start_fastapi():
     try:
         cmd = [sys.executable, "fastapi_app.py"]
         env = os.environ.copy()
+        env['FASTAPI_PORT'] = '8000'  # Ensure FastAPI runs on port 8000
         return subprocess.Popen(cmd, env=env)
     except Exception as e:
         print(f"❌ Failed to start FastAPI: {e}")
@@ -59,7 +60,10 @@ def start_proxy():
     print("🔀 Starting HTTP proxy...")
     try:
         cmd = [sys.executable, "nginx_proxy.py"]
-        return subprocess.Popen(cmd)
+        env = os.environ.copy()
+        # Proxy should bind to the Render PORT (default 10000)
+        env['PROXY_PORT'] = os.environ.get('PORT', '10000')
+        return subprocess.Popen(cmd, env=env)
     except Exception as e:
         print(f"❌ Failed to start proxy: {e}")
         return None
@@ -91,6 +95,12 @@ def main():
     processes = {}
     
     try:
+        print(f"📋 Port configuration:")
+        print(f"   - Flask (frontend): 5000")
+        print(f"   - FastAPI (backend): 8000") 
+        print(f"   - Proxy (external): {os.environ.get('PORT', '10000')}")
+        print()
+        
         # Start Flask
         processes['flask'] = start_flask()
         time.sleep(3)  # Give Flask time to start

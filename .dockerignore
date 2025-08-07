@@ -103,7 +103,7 @@ dmypy.json
 *.db
 *.sqlite
 *.sqlite3
-
+#
 # Chat sessions (will be created in container)
 chat_sessions/
 

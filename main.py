@@ -1836,7 +1836,8 @@ if __name__ == "__main__":
     # For Hugging Face Spaces compatibility
     debug_mode = os.getenv('DEBUG', 'False').lower() == 'true'
     host = os.getenv('HOST', '0.0.0.0')
-    port = int(os.getenv('PORT', 5000))
+    # Use FLASK_RUN_PORT if available, otherwise default to 5000
+    port = int(os.getenv('FLASK_RUN_PORT', os.getenv('PORT', 5000)))
     
     # Initialize database
     init_db()

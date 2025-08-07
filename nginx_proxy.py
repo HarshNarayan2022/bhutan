@@ -19,7 +19,7 @@ FLASK_HOST = "127.0.0.1"
 FLASK_PORT = 5000
 FASTAPI_HOST = "127.0.0.1"
 FASTAPI_PORT = 8000
-PROXY_PORT = int(os.environ.get('PORT', 10000))
+PROXY_PORT = int(os.environ.get('PROXY_PORT', os.environ.get('PORT', 10000)))
 
 class ReverseProxy:
     def __init__(self):
