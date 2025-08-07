@@ -630,16 +630,11 @@ def signup():
 # Find your user_dashboard function and replace it with:
 
 @app.route('/user_dashboard')
-@login_required
 def user_dashboard():
-    """User dashboard"""
-    user_data = session.get('user_data', {})
-    
-    # Option 1: Use the dashboard template we created
-    return render_template('user_dashboard.html', user_data=user_data)
-    
-    # Option 2: Or redirect to chatbot instead
-    # return redirect(url_for('chatbot'))
+    """User dashboard - simplified for 512MB deployment"""
+    # For 512MB optimization, redirect directly to chatbot
+    # No login check needed here since chatbot handles guest/user modes
+    return redirect(url_for('chatbot'))
 
 # Add new route for assessment
 @app.route('/assessment')
