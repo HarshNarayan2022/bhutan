@@ -84,15 +84,11 @@ async def lifespan(app: FastAPI):
             sentiment_analyzer_available = False
             
         try:
-            from opensource_rag import OpenSourceRAG
-            print("📚 Initializing open source RAG system...")
-            opensource_rag = OpenSourceRAG()
+            from agents.shared_rag import shared_rag_instance
             rag_available = True
-            print("✅ Open source RAG system ready")
         except ImportError as e:
-            print(f"⚠️ Open source RAG unavailable: {e}")
+            print(f"⚠️ RAG agent unavailable: {e}")
             rag_available = False
-            opensource_rag = None
             
         # Initialize sentiment analyzer in background
         global sentiment_analyzer
@@ -104,13 +100,15 @@ async def lifespan(app: FastAPI):
             sentiment_analyzer = None
             print("⚠️ Using basic sentiment analysis")
             
-        # Get the open source RAG instance
-        if rag_available and opensource_rag:
-            print("📚 Setting up open source RAG...")
+        # Get the shared RAG instance (this handles all initialization)
+        if rag_available:
+            print("📚 Getting shared RAG instance...")
+            rag = shared_rag_instance.get_rag()
+            print("✅ Shared RAG instance ready")
             
             # Store in app state
-            app.state.rag = opensource_rag
-            app.state.config = None  # No config needed for open source RAG
+            app.state.rag = rag
+            app.state.config = shared_rag_instance.config
         else:
             print("⚠️ Using basic response generation")
             app.state.rag = None

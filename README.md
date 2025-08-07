@@ -49,8 +49,8 @@ PORT=10000                    # Auto-set by Render
 FLASK_ENV=production
 PYTHONUNBUFFERED=1
 SECRET_KEY=your-secret-key    # Generate secure key
-MEMORY_MODE=free_tier         # Enables 512MB optimizations
-SKIP_AI_MODELS=1             # Disables heavy AI models for memory savings
+GROQ_API_KEY=your-groq-key    # Optional: For AI features
+GOOGLE_API_KEY=your-google-key # Optional: For enhanced features
 ```
 
 ### Deployment Files
@@ -62,25 +62,19 @@ SKIP_AI_MODELS=1             # Disables heavy AI models for memory savings
 
 ## 🌟 Features
 
-### Core Mental Health Support (100% Open Source)
+### Core Mental Health Support
 - **Interactive Chat Interface** - Real-time conversations with mental health support
 - **Crisis Detection** - Automatic identification of emergency situations
 - **Assessment Tools** - Standardized mental health questionnaires (PHQ-9, GAD-7, etc.)
 - **Resource Directory** - Crisis hotlines and mental health resources
 - **Session Management** - Persistent chat history and user context
-- **Open Source RAG** - Knowledge retrieval using scikit-learn (TF-IDF) instead of proprietary AI
-- **Open Source Speech-to-Text** - Vosk-based transcription (lightweight, no external APIs)
-- **Text-to-Speech** - Edge TTS (Microsoft's free, open source solution)
 
-### Technical Features (Memory Optimized for 512MB)
+### Technical Features
 - **Multi-Service Architecture** - Flask frontend + FastAPI backend
 - **Memory Optimized** - Runs efficiently in 512MB RAM
 - **Health Monitoring** - Built-in health checks and service monitoring
 - **Database Integration** - SQLite for data persistence
 - **API Endpoints** - RESTful APIs for chat, assessments, and data
-- **Open Source AI** - No proprietary APIs (OpenAI, etc.) - uses scikit-learn and Vosk
-- **Lightweight RAG** - TF-IDF based knowledge retrieval instead of heavy transformer models
-- **Efficient STT** - Vosk speech recognition (40MB model vs 1GB+ alternatives)
 
 ### Assessment Modules
 - **PHQ-9** - Depression screening questionnaire
@@ -100,9 +94,7 @@ bhutan/
 ├── requirements_production.txt # Memory-optimized dependencies
 ├── supervisor.conf           # Multi-service management
 ├── start_services.sh         # Service startup script
-├── opensource_rag.py         # Open source RAG system (scikit-learn)
-├── opensource_stt.py         # Open source speech-to-text (Vosk)
-├── validate_deployment.py    # Deployment validation script
+├── render.yaml              # Render deployment configuration
 ├── models/                  # Database models
 │   ├── user.py
 │   └── chat_session.py
@@ -166,11 +158,10 @@ python fastapi_app.py
 
 ## 📊 Memory Optimization for 512MB RAM
 
-### Lightweight Dependencies (512MB Optimized)
-- **Removed**: TensorFlow, PyTorch, Transformers, OpenAI API (1.5GB+ total)
-- **Added**: scikit-learn, Vosk, soundfile (<200MB total)
-- **Kept**: Essential packages only
-- **Strategy**: TF-IDF vectorization instead of transformer embeddings
+### Lightweight Dependencies
+- **Removed**: TensorFlow, PyTorch, Transformers (1.5GB+)
+- **Kept**: Essential packages only (<200MB)
+- **Added**: Memory-efficient alternatives
 
 ### Service Management
 - **Supervisor**: Manages Flask + FastAPI processes
@@ -262,24 +253,6 @@ docker logs <container-id>
 python -c "from main import init_db; init_db()"
 ```
 
-#### RAG System Issues
-```bash
-# Test the RAG system
-python -c "from opensource_rag import search_knowledge; print(search_knowledge('test query'))"
-```
-
-#### Speech-to-Text Issues
-```bash
-# Check if Vosk model is available
-python -c "from opensource_stt import opensource_stt; print(opensource_stt.is_available())"
-```
-
-#### Validation
-```bash
-# Run comprehensive validation
-python validate_deployment.py
-```
-
 ### Support
 - **Render Logs**: Real-time in dashboard
 - **Health Checks**: Monitor service status
@@ -321,34 +294,3 @@ python validate_deployment.py
 - **Support**: Check logs in Render dashboard
 
 **🎉 Your Bhutan Mental Health Chatbot is ready for production deployment!**
-
-## 🔧 Issues Fixed in This Version
-
-### ✅ Login/Dashboard Redirect Issue
-- **Problem**: Infinite redirect loop between `/login` and `/user_dashboard`
-- **Solution**: Simplified `user_dashboard` route to redirect directly to chatbot
-- **Result**: Users can now successfully log in and access their dashboard
-
-### ✅ RAG Pipeline Working (Open Source)
-- **Problem**: RAG system failed due to missing `sentence_transformers` 
-- **Solution**: Replaced with lightweight TF-IDF based system using scikit-learn
-- **Features**: 
-  - Built-in mental health responses
-  - Keyword-based fallback system
-  - Document ingestion from `knowledge/` folder
-  - Memory usage: <50MB vs 1GB+ for transformer models
-
-### ✅ Speech-to-Text Working (Open Source)
-- **Problem**: STT returned 503 errors due to missing Whisper
-- **Solution**: Implemented Vosk-based speech recognition
-- **Features**:
-  - Lightweight model (40MB vs 1GB+ for Whisper)
-  - No external API calls
-  - Supports multiple audio formats
-  - Automatic audio conversion and optimization
-
-### ✅ Memory Optimization Achieved
-- **Total Memory Usage**: <200MB (was 2GB+)
-- **Removed Dependencies**: OpenAI, transformers, torch, tensorflow
-- **Added Dependencies**: scikit-learn, vosk, soundfile
-- **Result**: Successfully fits in Render's 512MB free tier
