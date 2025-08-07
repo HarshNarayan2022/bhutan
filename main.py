@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, session, redirect, url_for, jsonify, Response , send_file
+from flask_session import Session
 import requests
 import numpy as np
 import os
@@ -46,14 +47,37 @@ class ChatMessageRequest:
 
 
 app = Flask(__name__)
-app.secret_key = os.getenv('SECRET_KEY', os.getenv('FLASK_SECRET_KEY', 'mental_health_app'))
-app.config["SESSION_COOKIE_NAME"] = "mental_health_app_session"
+
+# Enhanced session configuration for production deployment
+secret_key = os.getenv('SECRET_KEY', os.getenv('FLASK_SECRET_KEY', secrets.token_urlsafe(32)))
+app.secret_key = secret_key
+
+# Session cookie configuration optimized for Render deployment
+app.config["SESSION_COOKIE_NAME"] = "mh_session"
 app.config["SESSION_COOKIE_HTTPONLY"] = True
-app.config["SESSION_COOKIE_SECURE"] = False  # Set to True in production with HTTPS
+app.config["SESSION_COOKIE_SECURE"] = False  # Keep False for HTTP on Render
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
-app.config["SESSION_PERMANENT"] = True  # Allow permanent sessions
-app.config["PERMANENT_SESSION_LIFETIME"] = 3600  # 1 hour
-app.config["SESSION_USE_SIGNER"] = True  # Extra security for session cookies
+app.config["SESSION_PERMANENT"] = True
+app.config["PERMANENT_SESSION_LIFETIME"] = 86400  # 24 hours
+app.config["SESSION_USE_SIGNER"] = True
+app.config["SESSION_KEY_PREFIX"] = "mh:"
+app.config["SESSION_REDIS"] = None  # Use filesystem sessions
+app.config["SESSION_TYPE"] = "filesystem"  # Use server-side sessions
+app.config["SESSION_FILE_DIR"] = "/tmp/flask_sessions"
+app.config["SESSION_FILE_THRESHOLD"] = 500
+app.config["SESSION_FILE_MODE"] = 384
+
+# Create session directory if it doesn't exist
+session_dir = "/tmp/flask_sessions"
+os.makedirs(session_dir, exist_ok=True)
+
+# Initialize server-side sessions
+try:
+    Session(app)
+    print("✅ Flask-Session initialized with filesystem storage")
+except Exception as e:
+    print(f"⚠️ Flask-Session setup failed, falling back to client-side sessions: {e}")
+    # Fallback to default Flask sessions if Flask-Session fails
 
 # FastAPI backend URL - configurable for different deployment environments
 BACKEND_URL = os.getenv('BACKEND_URL', 'http://localhost:8000')
@@ -429,28 +453,103 @@ class ConversationHistory(Base):
 # Create tables
 Base.metadata.create_all(engine)
 
+# Helper function to safely set session data
+def set_user_session(user, user_data_dict=None):
+    """
+    Safely set user session data with multiple verification steps
+    """
+    try:
+        # Clear existing session to prevent conflicts
+        session.clear()
+        
+        # Set core user data
+        session['user_id'] = user.id
+        session['username'] = user.username
+        
+        # Set user data
+        if user_data_dict:
+            session['user_data'] = user_data_dict
+        else:
+            session['user_data'] = {
+                'name': user.full_name,
+                'has_completed_survey': False
+            }
+        
+        # Force session to be permanent and modified
+        session.permanent = True
+        session.modified = True
+        
+        # Verify session was set correctly
+        if session.get('user_id') == user.id:
+            print(f"✅ Session set successfully for user {user.username} (id={user.id})")
+            return True
+        else:
+            print(f"❌ Session verification failed for user {user.username}")
+            return False
+            
+    except Exception as e:
+        print(f"❌ Error setting session for user {user.username}: {e}")
+        return False
+
 # Authentication decorator
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         user_id = session.get('user_id')
-        all_session_keys = list(session.keys())
+        all_session_keys = list(session.keys()) if session else []
         
         print(f"🔐 login_required check for {request.endpoint}:")
         print(f"   user_id in session: {user_id}")
         print(f"   all session keys: {all_session_keys}")
-        print(f"   session cookie name: {app.config.get('SESSION_COOKIE_NAME')}")
+        print(f"   session_id: {getattr(session, 'sid', 'N/A')}")
         print(f"   request path: {request.path}")
         print(f"   request method: {request.method}")
+        print(f"   user_agent: {request.headers.get('User-Agent', 'N/A')[:50]}")
         
-        if 'user_id' not in session or session.get('user_id') is None:
+        # Check if user is authenticated
+        if not user_id or 'user_id' not in session:
             print(f"❌ Access denied to {request.endpoint} - no valid user_id in session")
+            # Store the URL they were trying to access for after login
             next_url = request.url if request.method == 'GET' else request.path
-            return redirect(url_for('login', next=next_url))
+            return redirect(url_for('home'))  # Redirect to home instead of login page
+        
+        # Verify user still exists in database
+        try:
+            db_session = DBSession()
+            user = db_session.query(User).filter_by(id=user_id).first()
+            db_session.close()
+            
+            if not user:
+                print(f"❌ User {user_id} not found in database, clearing session")
+                session.clear()
+                return redirect(url_for('home'))
+        except Exception as e:
+            print(f"⚠️ Database check failed for user {user_id}: {e}")
+            # Continue anyway - temporary database issues shouldn't log users out
         
         print(f"✅ Access granted to {request.endpoint} for user_id={user_id}")
         return f(*args, **kwargs)
     return decorated_function
+
+# Session health check endpoint for debugging
+@app.route('/session_check')
+def session_check():
+    """Debug endpoint to check session state"""
+    session_info = {
+        'user_id': session.get('user_id'),
+        'username': session.get('username'),
+        'user_data': session.get('user_data'),
+        'session_keys': list(session.keys()),
+        'permanent': session.permanent,
+        'session_id': getattr(session, 'sid', 'N/A'),
+        'cookie_config': {
+            'name': app.config.get('SESSION_COOKIE_NAME'),
+            'secure': app.config.get('SESSION_COOKIE_SECURE'),
+            'httponly': app.config.get('SESSION_COOKIE_HTTPONLY'),
+            'samesite': app.config.get('SESSION_COOKIE_SAMESITE'),
+        }
+    }
+    return jsonify(session_info)
 
 # Initialize session on each request
 @app.before_request
@@ -517,29 +616,19 @@ def login():
             user.last_login = datetime.utcnow()
             db_session.commit()
             
-            # Set basic session
-            session['user_id'] = user.id
-            session['username'] = user.username
-            
             # Load user's latest assessment data
             latest_assessment = db_session.query(UserAssessment).filter_by(
                 user_id=user.id, 
                 is_active=True
             ).order_by(UserAssessment.created_at.desc()).first()
             
+            user_data_dict = None
             if latest_assessment:
                 # Restore assessment data to session
-                session['assessment_data'] = {
-                    'basic_info': json.loads(latest_assessment.basic_info),
-                    'questionnaire_data': json.loads(latest_assessment.questionnaire_data),
-                    'assessment_result': json.loads(latest_assessment.assessment_result),
-                    'completed_date': latest_assessment.created_at.isoformat()
-                }
-                
                 basic_info = json.loads(latest_assessment.basic_info)
                 assessment_result = json.loads(latest_assessment.assessment_result)
                 
-                session['user_data'] = {
+                user_data_dict = {
                     'name': user.full_name or basic_info.get('name', ''),
                     'age': basic_info.get('age', ''),
                     'gender': basic_info.get('gender', ''),
@@ -550,26 +639,40 @@ def login():
                     'assessment_date': latest_assessment.created_at.strftime('%Y-%m-%d')
                 }
                 
+                session['assessment_data'] = {
+                    'basic_info': json.loads(latest_assessment.basic_info),
+                    'questionnaire_data': json.loads(latest_assessment.questionnaire_data),
+                    'assessment_result': json.loads(latest_assessment.assessment_result),
+                    'completed_date': latest_assessment.created_at.isoformat()
+                }
+                
                 print(f"✅ Loaded assessment data for user {user.username}")
             else:
                 # No previous assessment
-                session['user_data'] = {
+                user_data_dict = {
                     'name': user.full_name,
                     'has_completed_survey': False,
                     'result': 'No Assessment'
                 }
                 print(f"ℹ️ No previous assessment found for user {user.username}")
             
+            # Use the robust session setting function
+            session_set = set_user_session(user, user_data_dict)
+            
             if remember:
                 session.permanent = True
-            
-            # Ensure session is properly marked as modified
-            session.modified = True
-            
-            print(f"✅ User {user.username} logged in successfully, session set: user_id={user.id}")
+                session.modified = True
             
             db_session.close()
-            return redirect(url_for('user_dashboard'))
+            
+            if session_set:
+                print(f"✅ User {user.username} logged in successfully, redirecting to dashboard")
+                return redirect(url_for('user_dashboard'))
+            else:
+                print(f"❌ Session setup failed for user {user.username}")
+                return render_template('home.html', 
+                                     login_error='Login session setup failed. Please try again.', 
+                                     show_login_modal=True)
         else:
             db_session.close()
             return render_template('home.html', 
@@ -633,32 +736,26 @@ def signup():
         db_session.add(new_user)
         db_session.commit()
         
-        # Auto-login the new user - ensure session persists properly
-        session.clear()  # Clear any existing session data
-        session['user_id'] = new_user.id
-        session['username'] = new_user.username
-        session['user_data'] = {
+        # Auto-login the new user using robust session function
+        user_data_dict = {
             'name': new_user.full_name,
             'has_completed_survey': False
         }
         
-        # Force session to be saved immediately
-        session.permanent = True
-        session.modified = True
+        session_set = set_user_session(new_user, user_data_dict)
         
-        # Commit database changes before redirect
+        # Commit database changes
         db_session.commit()
-        
-        print(f"✅ User {new_user.username} signed up and logged in, session set: user_id={new_user.id}")
-        
-        # Give the session a moment to persist before redirect
-        import time
-        time.sleep(0.1)
-        
         db_session.close()
         
-        # Redirect to user dashboard
-        return redirect(url_for('user_dashboard'))
+        if session_set:
+            print(f"✅ User {new_user.username} signed up and logged in successfully")
+            return redirect(url_for('user_dashboard'))
+        else:
+            print(f"❌ Session setup failed for new user {new_user.username}")
+            return render_template('home.html', 
+                                 signup_error='Account created but login failed. Please try logging in manually.',
+                                 show_login_modal=True)
     
     return render_template('home.html', show_signup_modal=True)
 # Find your user_dashboard function and replace it with:
