@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+#noqa: D205,D400
 """
 Minimal startup script for Render - Starts all services
 """
