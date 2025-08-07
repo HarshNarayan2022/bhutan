@@ -84,35 +84,14 @@ def extract_topics(text):
     return topics
 
 
-# Load Whisper model once at startup with memory optimization
-whisper_model = None
 
-# Check if AI models should be skipped (free tier mode)
-if os.environ.get('SKIP_AI_MODELS') == '1' or os.environ.get('MEMORY_MODE') == 'free_tier':
-    print("🔧 Skipping Whisper model loading - running in free tier mode")
-    whisper_model = None
-else:
-    try:
-        import openai_whisper as whisper  # Try openai-whisper first
-        if hasattr(whisper, 'load_model'):
-            # Use tiny model with memory optimization for Render
-            whisper_model = whisper.load_model("tiny", device="cpu", download_root="/tmp")
-            print("✅ OpenAI Whisper model loaded successfully (tiny, CPU-optimized)")
-        else:
-            print("⚠️ OpenAI Whisper load_model not available")
-            whisper_model = None
-    except ImportError:
-        try:
-            import whisper  # Fallback to regular whisper
-            if hasattr(whisper, 'load_model'):
-                whisper_model = whisper.load_model("tiny", device="cpu", download_root="/tmp")
-                print("✅ Whisper model loaded successfully (tiny, CPU-optimized)")
-            else:
-                print("⚠️ Whisper load_model not available, using fallback")
-                whisper_model = None
-        except Exception as e:
-            print(f"⚠️ Whisper not available: {e}")
-            whisper_model = None
+# Load open source STT model
+try:
+    from opensource_stt import opensource_stt
+    print("✅ Open source STT (Vosk) initialized")
+except ImportError as e:
+    print(f"⚠️ Open source STT not available: {e}")
+    opensource_stt = None
 
 # Cache for TTS to avoid regenerating same text
 tts_cache = {}
@@ -125,8 +104,8 @@ def get_cached_tts(text_hash):
 @app.route('/transcribe', methods=['POST'])
 def transcribe():
     try:
-        # Check if Whisper is available
-        if not whisper_model:
+        # Check if open source STT is available
+        if not opensource_stt or not opensource_stt.is_available():
             return jsonify({
                 'error': 'Voice transcription is not available in this deployment mode. Please type your message instead.',
                 'transcript': ''
@@ -149,43 +128,31 @@ def transcribe():
             print(f"Saved temp file: {temp_file.name}")
             
             try:
-                # Skip WAV conversion for speed - try direct transcription first
-                if whisper_model:
-                    print("Starting fast transcription...")
-                    
-                    # Use fastest Whisper settings with memory optimization
-                    result = whisper_model.transcribe(
-                        temp_file.name,
-                        language='en',
-                        task='transcribe',
-                        temperature=0.0,
-                        no_speech_threshold=0.3,  # More lenient
-                        logprob_threshold=-1.0,   # More lenient
-                        compression_ratio_threshold=2.4,  # Faster processing
-                        fp16=False,  # Use FP32 to avoid CPU warnings
-                        verbose=False,  # Reduce memory usage
-                        word_timestamps=False  # Reduce memory usage
-                    )
-                    
-                    transcript = result['text'].strip()
-                    print(f"Fast transcription result: '{transcript}'")
-                    
-                    # Clean up temp file
+                # Use Vosk for transcription
+                print("Starting Vosk transcription...")
+                result = opensource_stt.transcribe_audio(temp_file.name)
+                
+                # Clean up temp file
+                try:
                     os.unlink(temp_file.name)
-                    
-                    # Force garbage collection to free memory
-                    del result
-                    gc.collect()
-                    
-                    if not transcript or len(transcript) < 2:
-                        return jsonify({
-                            'transcript': '',
-                            'error': 'No speech detected. Please speak clearly and hold the button longer.'
-                        })
-                    
-                    return jsonify({'transcript': transcript})
-                else:
-                    return jsonify({'error': 'Whisper model not available'}), 500
+                except:
+                    pass
+                
+                # Force garbage collection to free memory
+                gc.collect()
+                
+                # Check for errors in result
+                if 'error' in result:
+                    return jsonify(result)
+                
+                transcript = result.get('transcript', '').strip()
+                if not transcript or len(transcript) < 2:
+                    return jsonify({
+                        'transcript': '',
+                        'error': 'No speech detected. Please speak clearly and hold the button longer.'
+                    })
+                
+                return jsonify({'transcript': transcript})
                     
             except Exception as e:
                 print(f"Transcription error: {e}")
@@ -630,16 +597,11 @@ def signup():
 # Find your user_dashboard function and replace it with:
 
 @app.route('/user_dashboard')
-@login_required
 def user_dashboard():
-    """User dashboard"""
-    user_data = session.get('user_data', {})
-    
-    # Option 1: Use the dashboard template we created
-    return render_template('user_dashboard.html', user_data=user_data)
-    
-    # Option 2: Or redirect to chatbot instead
-    # return redirect(url_for('chatbot'))
+    """User dashboard - simplified for 512MB deployment"""
+    # For 512MB optimization, always redirect to chatbot
+    # No complex dashboard needed - the chatbot is the main interface
+    return redirect(url_for('chatbot'))
 
 # Add new route for assessment
 @app.route('/assessment')

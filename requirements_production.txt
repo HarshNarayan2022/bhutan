@@ -28,8 +28,19 @@ httpx==0.25.1
 # Security
 bcrypt==4.1.2
 
-# Essential AI/ML (lightweight versions only)
-openai==1.3.5
+# Essential AI/ML (lightweight, open source only)
+# Removed: openai (closed source)
+
+# Open source alternatives for lightweight ML
+scikit-learn==1.3.0
+spacy==3.6.1
+
+# Open source speech recognition (lightweight)
+vosk==0.3.45
+soundfile==0.12.1
+
+# For audio processing in Vosk
+scipy==1.11.1
 
 # Basic ML/Data processing (minimal versions)
 numpy==1.24.4
