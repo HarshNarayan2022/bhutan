@@ -1,4 +1,5 @@
-# Render Cloud Docker Deployment - Optimized for 512MB RAM
+# Production Dockerfile for Render - Flask + FastAPI
+# Optimized for 512MB RAM deployment
 FROM python:3.11-slim
 
 # Set working directory
@@ -9,32 +10,42 @@ ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PIP_NO_CACHE_DIR=1
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1
+ENV TOKENIZERS_PARALLELISM=false
 
-# Install system dependencies (minimal)
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     gcc \
     g++ \
     make \
     curl \
+    supervisor \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
 
-# Copy and install Python dependencies (memory-optimized)
-COPY requirements_render.txt requirements.txt
+# Copy requirements and install Python dependencies
+COPY requirements_production.txt requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
 COPY . .
 
 # Create necessary directories
-RUN mkdir -p logs data uploads chat_sessions
+RUN mkdir -p logs data uploads chat_sessions processed_docs \
+    && mkdir -p /var/log/supervisor
+
+# Copy supervisor configuration
+COPY supervisor.conf /etc/supervisor/conf.d/supervisord.conf
+
+# Create startup script
+COPY start_services.sh /start_services.sh
+RUN chmod +x /start_services.sh
 
 # Expose port for Render
 EXPOSE 10000
 
 # Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:10000/health || exit 1
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+    CMD curl -f http://localhost:5000/health || exit 1
 
-# Run the memory-optimized application with production WSGI server
-CMD ["gunicorn", "--bind", "0.0.0.0:10000", "--workers", "1", "--threads", "2", "--timeout", "120", "app_render:app"]
+# Start services using supervisor
+CMD ["/start_services.sh"]

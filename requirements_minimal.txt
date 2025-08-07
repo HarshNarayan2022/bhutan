@@ -1,7 +1,0 @@
-# ABSOLUTE MINIMAL - GUARANTEED FAST BUILD
-# Only core dependencies needed for basic mental health chatbot
-
-gradio==4.15.0
-Flask==2.3.3
-requests>=2.31.0
-python-dotenv>=1.0.0

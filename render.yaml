@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
 Render Deployment Configuration
-For mental health chatbot optimized for 512MB RAM
+Flask + FastAPI Production Setup for 512MB RAM
 """
 
 services:
   - type: web
-    name: mental-health-chatbot
+    name: bhutan-mental-health-chatbot
     env: docker
     dockerfilePath: ./Dockerfile
     plan: free
@@ -29,13 +29,20 @@ services:
         value: "10000"
       - key: SECRET_KEY
         generateValue: true
+      - key: FLASK_SECRET_KEY
+        generateValue: true
+      - key: GOOGLE_API_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
     
     # Health check configuration
     healthCheckPath: /health
     
     # Build configuration
     buildCommand: echo "Using Docker build"
-    startCommand: python app_render.py
     
     # Scaling (free tier limitations)
     numInstances: 1
