@@ -36,9 +36,8 @@ RUN mkdir -p logs data uploads chat_sessions processed_docs \
 # Copy supervisor configuration
 COPY supervisor.conf /etc/supervisor/conf.d/supervisord.conf
 
-# Create startup script
-COPY start_services.sh /start_services.sh
-RUN chmod +x /start_services.sh
+# Make startup script executable
+RUN chmod +x start_services.sh
 
 # Expose port for Render
 EXPOSE 10000
@@ -47,5 +46,5 @@ EXPOSE 10000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
     CMD curl -f http://localhost:5000/health || exit 1
 
-# Start services using supervisor
-CMD ["/start_services.sh"]
+# Start services using startup script
+CMD ["./start_services.sh"]

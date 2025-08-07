@@ -62,7 +62,7 @@ test_*.py
 *_test.py
 validate_*.py
 deploy_*.py
-start_*.sh
+start_render_deployment.sh
 
 # Documentation (keep essential ones)
 docs/
