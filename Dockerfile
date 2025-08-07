@@ -36,5 +36,5 @@ EXPOSE 10000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:10000/health || exit 1
 
-# Run the memory-optimized application
-CMD ["python", "app_render.py"]
+# Run the memory-optimized application with production WSGI server
+CMD ["gunicorn", "--bind", "0.0.0.0:10000", "--workers", "1", "--threads", "2", "--timeout", "120", "app_render:app"]

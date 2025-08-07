@@ -23,3 +23,6 @@ textblob>=0.17.1
 
 # Memory-efficient packages only
 Pillow>=10.1.0
+
+# Production WSGI server
+gunicorn>=21.2.0
